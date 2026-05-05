@@ -249,7 +249,10 @@ def scrape_all(
     all_stocks:  list[dict] = []
     all_options: list[dict] = []
 
-    for year in years:
+    caught_up = False
+    for year in sorted(years, reverse=True):
+        if caught_up:
+            break
         print(f"\n[{year}] Fetching filing index...")
         try:
             filings = _get_filing_index(year)
@@ -257,6 +260,7 @@ def scrape_all(
             print(f"  ERROR fetching index: {e}")
             continue
 
+        filings.sort(key=lambda f: f.get("filing_date", ""), reverse=True)
         print(f"  {len(filings)} PTR filings found")
         if max_per_year:
             filings = filings[:max_per_year]
@@ -265,7 +269,8 @@ def scrape_all(
         for i, filing in enumerate(filings):
             doc_id = filing["doc_id"]
             if doc_id in processed_ids:
-                continue
+                caught_up = True
+                break
 
             url = f"https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/{year}/{doc_id}.pdf"
             try:
@@ -303,7 +308,7 @@ def scrape_all(
             all_stocks  = []
             all_options = []
 
-    print(f"\nComplete. Stocks → {_OUT_FILE} | Options → {_OPTIONS_FILE}")
+    print(f"\nComplete. Stocks: {_OUT_FILE} | Options: {_OPTIONS_FILE}")
     if options_only or not os.path.exists(_OUT_FILE):
         return pd.DataFrame()
     return pd.read_csv(_OUT_FILE)

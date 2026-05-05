@@ -267,7 +267,7 @@ def scrape_all(options_only: bool = False) -> None:
     for i, filing in enumerate(filings):
         doc_id = filing["doc_id"]
         if doc_id in processed_ids:
-            continue
+            break  # API returns newest-first; first known = all subsequent known
 
         try:
             if filing["filing_type"] == "html":
@@ -305,7 +305,7 @@ def scrape_all(options_only: bool = False) -> None:
         _append_to_csv(all_stocks, _OUT_FILE)
     _append_to_csv(all_options, _OPTIONS_FILE)
     print(f"\nDone. {new_count} new filings processed.")
-    print(f"Stocks → {_OUT_FILE} | Options → {_OPTIONS_FILE}")
+    print(f"Stocks: {_OUT_FILE} | Options: {_OPTIONS_FILE}")
 
 
 def load_historical() -> pd.DataFrame:

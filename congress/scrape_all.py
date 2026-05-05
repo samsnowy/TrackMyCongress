@@ -1,8 +1,11 @@
 """
 Run both House and Senate PTR scrapers in sequence.
 
+Both scrapers process newest filings first and stop as soon as they
+hit a doc_id already in the CSV — so incremental runs are fast.
+
 Usage:
-  python -m congress.scrape_all                # full run (stocks + options)
+  python -m congress.scrape_all                # incremental (default)
   python -m congress.scrape_all --options-only # re-parse options only
 """
 

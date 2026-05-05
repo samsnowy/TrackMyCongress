@@ -10,3 +10,4 @@ venv/
 *.json
 .claude/
 CLAUDE.md
+*.bat
