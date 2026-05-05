@@ -13,10 +13,16 @@ RISK_PER_TRADE = 0.01
 
 # Live strategy parameters (congress/strategy.py + congress/live.py)
 HOLD_DAYS          = 90     # stock signal hold period (days)
-OPTIONS_HOLD_DAYS  = 30     # options signal hold period — signal fades faster
+OPTIONS_HOLD_DAYS  = 30     # options signal hold period -- signal fades faster
 MAX_POSITIONS      = 15
 POSITION_SIZE_PCT  = 0.05   # 5% of equity per position
 SIGNAL_LOOKBACK    = 7      # days back for stock signals
 OPTIONS_LOOKBACK   = 30     # days back for options signals
+MAX_SIGNAL_AGE     = 7      # skip signals older than this many days on first run
 DEEP_ITM_THRESHOLD = 0.85   # strike/current_price below this = call is >=15% ITM
 SIMULATED_EQUITY   = 100_000.0  # dry-run fallback when Alpaca is unavailable
+
+# Reliable politician filter (congress/strategy.py + main.py followcongress)
+# Tighter than the old excess>0/trades>=5 defaults to cut bottom-of-list noise.
+RELIABLE_MIN_EXCESS = 2.0   # minimum avg excess return % to be considered reliable
+RELIABLE_MIN_TRADES = 20    # minimum trade count (sample size floor)

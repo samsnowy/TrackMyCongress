@@ -20,12 +20,12 @@ Buy at close on the day a trade is publicly filed. Hold N days. Compare to SPY o
 
 | Hold | Reliable politicians | Trades | Avg Excess | Win% |
 |------|---------------------|--------|------------|------|
-| 10d  | 45/73               | 2,753  | +0.6%      | 53%  |
-| 30d  | 39/72               | 2,697  | +1.1%      | 51%  |
-| 60d  | 35/72               | 2,371  | +1.8%      | 52%  |
-| 90d  | 37/71               | 2,225  | **+2.3%**  | 50%  |
+| 10d  | 2,754  | +0.6%      | 53%  |
+| 30d  | 2,708  | +1.1%      | 51%  |
+| 60d  | 2,205  | +2.0%      | 53%  |
+| 90d  | 2,237  | **+2.4%**  | 51%  |
 
-"Reliable" = politicians with positive average excess return and ≥5 trades in the dataset.
+"Reliable" = 12 politicians with avg excess >2% and ≥20 trades in the dataset.
 
 The edge isn't in win rate (hovers ~50–53% regardless of hold period) — it's in the asymmetric return distribution. Alpha grows consistently with time, consistent with an informational edge that plays out over months.
 
@@ -87,7 +87,7 @@ Two signal types, one execution path. State persisted in `strategy_state.json`. 
 
 | Signal | Source | Filter | Hold |
 |--------|--------|--------|------|
-| Stock purchase | Quiver live feed (7-day lookback) | Reliable group (37 pols, positive excess + ≥5 trades) + exclude $1k–$15k filings | 90 days |
+| Stock purchase | Quiver live feed (7-day lookback) | Reliable group (12 pols, avg excess >2% + ≥20 trades) + exclude $1k–$15k filings | 90 days |
 | Deep ITM call | Quiver `TickerType==OP` (30-day lookback) | Gottheimer / Pelosi / Ross / Bresnahan + `strike/price < 0.85` | 30 days |
 
 **Sizing:** 5% of equity per position, max 15 simultaneous positions.

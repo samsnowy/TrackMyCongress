@@ -201,6 +201,130 @@ def analyse_house_calls(df: pd.DataFrame) -> None:
         print(f"    {ticker:<8} {cnt:>3}x  {', '.join(traders)}")
 
 
+def backtest_options_signals(
+    df: pd.DataFrame,
+    hold_days_list: list[int] | None = None,
+    calls_only: bool = True,
+    deep_itm_only: bool = False,
+    itm_threshold: float = 0.85,
+    min_trades: int = 2,
+) -> dict[int, pd.DataFrame]:
+    """
+    For each call purchase filing, buy the underlying stock on filing_date
+    and hold N days. Rank politicians by excess return vs SPY.
+
+    Returns a dict keyed by hold_days, each value is a rankings DataFrame with
+    columns: politician, chamber, trades, avg_excess, win_rate, avg_ret, avg_spy.
+
+    deep_itm_only: only include rows where strike / stock_price_at_filing < itm_threshold.
+                   Rows with unknown strike are excluded when this filter is active.
+    """
+    if hold_days_list is None:
+        hold_days_list = [30, 60, 90]
+
+    signals = df[df["transaction"] == "Purchase"].copy()
+    if calls_only:
+        signals = signals[signals["option_type"] == "Call"]
+    signals = signals.dropna(subset=["filing_date", "ticker"])
+
+    if signals.empty:
+        return {}
+
+    tickers = signals["ticker"].unique().tolist()
+    start   = signals["filing_date"].min()
+    end     = signals["filing_date"].max() + timedelta(days=max(hold_days_list) + 10)
+
+    print(f"  Fetching prices for {len(tickers)} tickers...")
+    closes = fetch_daily_closes(tickers, start, end)
+
+    results_by_hold: dict[int, list[dict]] = {h: [] for h in hold_days_list}
+
+    for _, row in signals.iterrows():
+        ticker      = row["ticker"]
+        filing_date = row["filing_date"]
+        politician  = row["name"]
+        chamber     = row.get("chamber", "Unknown")
+        strike      = row.get("strike")
+
+        entry   = _price_on_or_after(closes, ticker,  filing_date)
+        spy_e   = _price_on_or_after(closes, "SPY",   filing_date)
+        if entry is None or spy_e is None:
+            continue
+
+        if deep_itm_only:
+            if pd.isna(strike):
+                continue
+            try:
+                if float(strike) / entry >= itm_threshold:
+                    continue
+            except (TypeError, ValueError):
+                continue
+
+        for hold in hold_days_list:
+            exit_date = filing_date + timedelta(days=hold)
+            exit_p    = _price_on_or_after(closes, ticker, exit_date)
+            spy_x     = _price_on_or_after(closes, "SPY",  exit_date)
+            if exit_p is None or spy_x is None:
+                continue
+            ret     = (exit_p - entry)   / entry   * 100
+            spy_ret = (spy_x  - spy_e)   / spy_e   * 100
+            results_by_hold[hold].append({
+                "politician": politician,
+                "chamber":    chamber,
+                "ticker":     ticker,
+                "ret":        ret,
+                "spy_ret":    spy_ret,
+                "excess":     ret - spy_ret,
+            })
+
+    out = {}
+    for hold, rows in results_by_hold.items():
+        if not rows:
+            out[hold] = pd.DataFrame()
+            continue
+        rdf = pd.DataFrame(rows)
+        grp = rdf.groupby(["politician", "chamber"]).agg(
+            trades    = ("ret", "count"),
+            avg_ret   = ("ret",    "mean"),
+            avg_spy   = ("spy_ret","mean"),
+            avg_excess= ("excess", "mean"),
+            win_rate  = ("excess", lambda x: (x > 0).mean() * 100),
+        ).reset_index()
+        grp = grp[grp["trades"] >= min_trades].sort_values("avg_excess", ascending=False)
+        for col in ("avg_ret", "avg_spy", "avg_excess", "win_rate"):
+            grp[col] = grp[col].round(2)
+        out[hold] = grp.reset_index(drop=True)
+    return out
+
+
+def print_options_rankings(rankings_by_hold: dict[int, pd.DataFrame], deep_itm: bool = False) -> None:
+    label = "Deep ITM calls" if deep_itm else "All call purchases"
+    print(f"\n{'='*70}")
+    print(f"  Options Signal Backtest -- {label}")
+    print(f"  Strategy: buy underlying stock on filing date, hold N days vs SPY")
+    print(f"{'='*70}")
+
+    for hold, df in sorted(rankings_by_hold.items()):
+        if df.empty:
+            print(f"\n  Hold {hold}d -- no data")
+            continue
+        reliable = df[(df["avg_excess"] > 0) & (df["trades"] >= 2)]
+        print(f"\n  Hold {hold}d  ({len(df)} politicians, {int(df['trades'].sum())} signals, "
+              f"{len(reliable)} with positive excess)")
+        print(f"  {'Politician':<32} {'Ch':<3} {'Trades':>6}  {'Avg Excess':>10}  {'Win%':>5}  {'Avg Ret':>8}  {'vs SPY':>7}")
+        print("  " + "-" * 74)
+        for _, row in df.head(20).iterrows():
+            marker = " *" if row["avg_excess"] > 0 else "  "
+            print(
+                f"{marker}{row['politician']:<32} {row['chamber'][:1]:<3}"
+                f"{int(row['trades']):>6}  "
+                f"{row['avg_excess']:>+9.1f}%  "
+                f"{row['win_rate']:>4.0f}%  "
+                f"{row['avg_ret']:>+7.1f}%  "
+                f"{row['avg_spy']:>+6.1f}%"
+            )
+
+
 def run_options_analysis() -> None:
     df = load_options()
     print_overview(df)

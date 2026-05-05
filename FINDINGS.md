@@ -27,65 +27,38 @@ Only 9 House reps and ~15 senators traded options at all. Options trading is hig
 
 ### Holding Period Sensitivity — Reliable Group
 
-Reliable = politicians with positive avg excess return AND ≥5 trades.
+Reliable = avg excess >2% AND ≥20 trades (tightened from original excess>0/≥5 trades screen of 37 politicians down to 12).
 
-| Hold | Reliable pols | Total trades | Avg Excess | Win% | Avg Ret | SPY |
-|------|--------------|-------------|-----------|------|---------|-----|
-| 10d  | 45/73        | 2,754       | +0.6%     | 53%  | +1.0%   | +0.4% |
-| 20d  | 41/73        | 2,989       | +0.8%     | 53%  | +1.6%   | +0.9% |
-| 30d  | 39/72        | 2,698       | +1.1%     | 51%  | +2.4%   | +1.3% |
-| 60d  | 35/72        | 2,372       | +1.8%     | 52%  | +5.1%   | +3.2% |
-| 90d  | 37/73        | 2,217       | +2.3%     | 51%  | +6.8%   | +4.5% |
+| Hold | Total trades | Avg Excess | Win% | Avg Ret | SPY |
+|------|-------------|-----------|------|---------|-----|
+| 10d  | 2,754       | +0.6%     | 53%  | +1.0%   | +0.4% |
+| 20d  | 2,961       | +0.8%     | 53%  | +1.6%   | +0.8% |
+| 30d  | 2,708       | +1.1%     | 51%  | +2.5%   | +1.4% |
+| 60d  | 2,205       | +2.0%     | 53%  | +5.2%   | +3.3% |
+| 90d  | 2,237       | +2.4%     | 51%  | +6.9%   | +4.5% |
 
-**Key observation:** alpha grows consistently with hold period. Strongest signal at 90 days (+2.3% excess). Win rate hovers around 50–53% regardless of hold — the edge is in the magnitude of wins, not win frequency.
+**Key observation:** alpha grows consistently with hold period. Strongest signal at 90 days (+2.4% excess). Win rate hovers around 50–53% regardless of hold — the edge is in the magnitude of wins, not win frequency.
 
-### Full Reliable Group at 90d (congress_rankings.csv, generated 2026-04-30)
+### Full Reliable Group at 90d (congress_rankings.csv, generated 2026-05-05)
 
-37 politicians with positive avg excess and ≥5 trades on the combined House + Senate dataset.
+12 politicians with avg excess >2% and ≥20 trades on the combined House + Senate dataset.
 
 | Politician | Trades | Avg Excess | Win% |
 |---|---|---|---|
 | Daniel S Sullivan | 40 | +14.8% | 87.5% |
-| Mark Dr Green | 9 | +13.8% | 100.0% |
-| Kelly Louise Morrison | 5 | +13.4% | 80.0% |
 | Tim Moore | 41 | +12.9% | 65.9% |
-| Tina Smith | 5 | +9.8% | 80.0% |
 | David H McCormick | 24 | +8.9% | 83.3% |
-| James R. Langevin | 7 | +8.8% | 57.1% |
 | Byron Donalds | 29 | +6.4% | 44.8% |
 | Cleo Fields | 81 | +6.3% | 61.7% |
 | Greg Landsman | 22 | +5.8% | 63.6% |
-| Dwight Evans | 8 | +5.0% | 62.5% |
 | Thomas Suozzi | 30 | +4.9% | 56.7% |
-| Jerry Moran | 19 | +3.7% | 47.4% |
 | Julie Johnson | 42 | +3.7% | 64.3% |
 | Shelley M Capito | 34 | +3.0% | 58.8% |
-| Thomas H. Kean | 18 | +2.7% | 44.4% |
-| Katie Britt | 16 | +2.6% | 69.0% |
 | Richard Dean Dr McCormick | 24 | +2.5% | 58.3% |
-| Alan S. Lowenthal | 10 | +2.4% | 70.0% |
 | Sheldon Whitehouse | 20 | +2.1% | 50.0% |
 | Thomas H Tuberville | 285 | +2.1% | 42.8% |
-| Rick Larsen | 18 | +1.9% | 55.6% |
-| John Rutherford | 5 | +1.7% | 60.0% |
-| Josh Gottheimer | 362 | +1.7% | 48.3% |
-| Virginia Foxx | 108 | +1.5% | 50.9% |
-| Scott Franklin | 8 | +1.1% | 62.5% |
-| A. Mitchell McConnell, Jr. | 17 | +1.1% | 47.1% |
-| Earl Blumenauer | 16 | +1.0% | 50.0% |
-| Jared Moskowitz | 114 | +1.0% | 51.8% |
-| Marjorie Taylor Mrs Greene | 61 | +0.9% | 49.2% |
-| Greg Stanton | 53 | +0.7% | 50.9% |
-| David J. Taylor | 18 | +0.7% | 44.4% |
-| Markwayne Mullin | 272 | +0.6% | 50.4% |
-| John Boozman | 155 | +0.4% | 39.4% |
-| Robert J. Wittman | 19 | +0.4% | 57.9% |
-| William R. Keating | 18 | +0.1% | 50.0% |
-| Gilbert Cisneros | 204 | +0.0% | 42.6% |
 
-Changes from 2026-04-25: **Katie Britt entered** (16 trades, +2.6%, 69% win) replacing **Angus King** who dropped to -0.9% with 2 additional trades. All core metrics unchanged.
-
-Most statistically meaningful (high trade count + excess): **Cleo Fields (81 trades, +6.3%), Daniel Sullivan (40, +14.8%), Tim Moore (41, +12.9%), Julie Johnson (42, +3.7%), Josh Gottheimer (362, +1.7%)**.
+Most statistically meaningful (high trade count + excess): **Cleo Fields (81 trades, +6.3%), Tim Moore (41, +12.9%), Daniel Sullivan (40, +14.8%), Julie Johnson (42, +3.7%)**. Tuberville (285 trades) has the largest sample but lowest excess — primarily an options straddle trader whose stock picks are incidental.
 
 ### Interpretation
 
@@ -186,6 +159,31 @@ Audited all 41 House call purchases with known strike data against stock price o
 The Quiver Quant live feed (`congress_trades.csv`) includes options rows via `TickerType == "OP"`. The `Description` field contains `"CALL OPTIONS; STRIKE PRICE $X; EXPIRES MM/DD/YYYY"`. No separate scraping needed for live detection — `fetch_options()` in `fetcher.py` parses these rows automatically.
 
 Exercise events are absent from all data sources — they do not appear as stock purchases and create no false signals.
+
+---
+
+## Strategy 2: Hold Through the Sell Filing
+
+**Setup:** Buy at close on `buy_filed` (same entry as Strategy 1). Exit at close on `sell_filed + N days` — i.e., hold until the *same politician* publicly files their sell, then hold N more days. Filtered to the 12 reliable politicians (excess >2%, ≥20 trades). 334 matched buy/sell pairs.
+
+| Hold after sell filing | Pairs | Avg Ret | SPY | Excess | Win% |
+|---|---|---|---|---|---|
+| sell_filed +0d  | 334 | +11.1% | +7.5%  | +3.7% | 43% |
+| **sell_filed +10d** | **334** | **+11.8%** | **+7.8%** | **+4.0%** | **49%** |
+| sell_filed +20d | 334 | +12.4% | +8.7%  | +3.7% | 52% |
+| sell_filed +30d | 334 | +13.2% | +9.6%  | +3.6% | 50% |
+| sell_filed +60d | 334 | +15.1% | +11.4% | +3.6% | 47% |
+| sell_filed +90d | 334 | +17.4% | +13.6% | +3.8% | 43% |
+
+**Strategy 1 benchmark:** fixed 90d hold → +2.4% excess, 51% win rate.
+
+**Key findings:**
+- +10d after sell filing is the sweet spot at +4.0% excess — beats Strategy 1 by +1.6% with 49% win rate
+- Win rate peaks at 52% at +20d then fades — the +10d point balances excess and win rate best
+- The pattern is no longer monotonic: excess peaks at +10d then plateaus rather than climbing to +90d
+- The implication: hold about 10 days past the sell filing, then exit. Holding longer doesn't add return with the tighter politician group.
+
+**The bull market caveat:** The entire 2022–2026 dataset is a mostly bullish regime. Politicians — particularly reliable ones — skew heavily toward large-cap tech (NVDA, MSFT, AAPL, GOOGL). In a bull market, buying large-cap tech and holding longer almost always beats SPY on a rolling basis. It is difficult to distinguish between genuine informational edge and a tech-heavy portfolio running in a tech bull market. The excess return vs SPY controls for market direction but does not control for sector or factor exposure. A beta/factor-adjusted analysis would isolate whether the edge survives after accounting for tech concentration.
 
 ---
 

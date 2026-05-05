@@ -62,7 +62,7 @@
       STOCK Act filings are public — members of Congress must disclose trades within 45 days.
       We backtested <strong style="color:#f1f5f9">10,000+ trades</strong> from 170 members against SPY.
       A 90-day follow-disclosure strategy outperforms by
-      <strong style="color:#34d399">+2.3%</strong> on average — and the edge grows with time.
+      <strong style="color:#34d399" id="hero-avg-excess">+2.4%</strong> on average — and the edge grows with time.
     </p>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="card p-5">
@@ -113,7 +113,7 @@
             <tbody id="sensitivityBody"></tbody>
           </table>
           <div class="px-5 py-3 border-t text-xs" style="border-color:#334155;color:#64748b">
-            Reliable group only (<span id="caption-reliable-count">37</span> politicians, positive avg excess + ≥5 trades). Dataset: House + Senate, 2022–2026.
+            Reliable group only (<span id="caption-reliable-count">12</span> politicians, avg excess &gt;2% + ≥20 trades). Dataset: House + Senate, 2022–2026.
           </div>
         </div>
 
@@ -141,15 +141,16 @@
       <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#34d399">Finding 2</div>
       <h2 class="text-3xl md:text-4xl font-bold mb-4">Top performers at 90-day hold</h2>
       <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
-        <span id="subtitle-reliable-count">37</span> politicians with positive average excess return and ≥5 trades in the 2022–2026 dataset.
+        <span id="subtitle-reliable-count">12</span> politicians with avg excess return &gt;2% and ≥20 trades in the 2022–2026 dataset.
         Darker bars = more trades = more statistically meaningful.
       </p>
       <div class="card p-6">
         <canvas id="politiciansChart" style="max-height:340px"></canvas>
       </div>
       <div class="mt-3 text-xs text-center" style="color:#64748b">
-        Strongest signal by trade count: Cleo Fields (81 trades, +6.3%), Josh Gottheimer (362 trades, +1.7%), Thomas
-        Tuberville (285 trades, +2.1%). Mark Green's +13.8% is based on only 9 trades — treat as a small-sample outlier.
+        Strongest by count: Cleo Fields (81 trades, +6.3%) and Tuberville (285 trades, +2.1%).
+        Sullivan (+14.8%) and Moore (+12.9%) lead by excess return.
+        Gottheimer (362 trades, +1.7%) and Mark Green (+13.8%, only 9 trades) excluded by the tightened filter — below the excess &gt;2% / ≥20 trade floor.
       </div>
     </div>
   </section>
@@ -313,7 +314,7 @@
       <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#34d399">Static Snapshot</div>
       <h2 class="text-3xl md:text-4xl font-bold mb-2">Recent STOCK Act filings</h2>
       <p class="max-w-2xl mb-8 leading-relaxed" style="color:#94a3b8">
-        Sample of recent disclosures from the Quiver Quant feed, as of the last backtest run.
+        Last 90 days of disclosures from the Quiver Quant feed.
         Not live — data is updated manually when the scraper runs.
         <span style="color:#64748b" id="snapshot-date">Snapshot: 2026-04-30.</span>
       </p>
@@ -323,6 +324,7 @@
         <button onclick="filterFilings('all')"       class="filing-filter active-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="all">All</button>
         <button onclick="filterFilings('purchase')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="purchase">Purchases only</button>
         <button onclick="filterFilings('sale')"      class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="sale">Sales only</button>
+        <button onclick="filterFilings('options')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="options">Options only</button>
         <button onclick="filterFilings('reliable')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="reliable">★ Reliable group only</button>
       </div>
 
@@ -344,8 +346,29 @@
           </table>
         </div>
         <div class="px-4 py-3 text-xs" style="color:#475569;border-top:1px solid #1e293b">
-          ★ = in reliable backtest group (positive avg excess return, ≥5 trades at 90d hold) &nbsp;·&nbsp;
+          ★ = in reliable backtest group (avg excess &gt;2%, ≥20 trades at 90d hold) &nbsp;·&nbsp;
           Low conv = $1k–$15k bracket, filtered from live strategy
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between mt-4 text-sm" id="paginationBar">
+        <div style="color:#64748b">
+          Showing <span id="pageStart">1</span>–<span id="pageEnd">20</span>
+          of <span id="pageTotal">0</span> filings
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="pagePrev" onclick="changePage(-1)"
+            class="px-3 py-1.5 rounded border text-xs font-semibold transition-colors"
+            style="background:#1e293b;border-color:#334155;color:#94a3b8">
+            &larr; Prev
+          </button>
+          <span id="pageLabel" style="color:#94a3b8;min-width:80px;text-align:center"></span>
+          <button id="pageNext" onclick="changePage(1)"
+            class="px-3 py-1.5 rounded border text-xs font-semibold transition-colors"
+            style="background:#1e293b;border-color:#334155;color:#94a3b8">
+            Next &rarr;
+          </button>
         </div>
       </div>
     </div>
@@ -361,6 +384,7 @@
       '~' + Math.round(STATS.total_trades / 1000) + ',000';
     document.getElementById('stat-total-options').textContent = STATS.total_options;
     document.getElementById('stat-avg-excess').textContent   = '+' + STATS.avg_excess_90d + '%';
+    document.getElementById('hero-avg-excess').textContent   = '+' + STATS.avg_excess_90d + '%';
     document.getElementById('stat-reliable-count').textContent = STATS.reliable_count;
     document.getElementById('snapshot-date').textContent = 'Snapshot: ' + DATA_GENERATED + '.';
     ['caption-reliable-count','subtitle-reliable-count'].forEach(function(id) {
@@ -391,9 +415,23 @@
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    const PAGE_SIZE = 20;
+    let _currentRows = FILINGS;
+    let _currentPage = 0;
+
     function renderFilings(rows) {
-      const tbody = document.getElementById('filingsBody');
-      tbody.innerHTML = rows.map((r, i) => {
+      _currentRows = rows;
+      _currentPage = 0;
+      renderPage();
+    }
+
+    function renderPage() {
+      const start  = _currentPage * PAGE_SIZE;
+      const end    = Math.min(start + PAGE_SIZE, _currentRows.length);
+      const page   = _currentRows.slice(start, end);
+      const tbody  = document.getElementById('filingsBody');
+
+      tbody.innerHTML = page.map((r, i) => {
         const isBuy     = r.txn === 'Purchase';
         const isOpt     = r.type === 'OP';
         const rowBg     = i % 2 === 0 ? '' : 'style="background:#0f172a40"';
@@ -408,8 +446,8 @@
           : '';
 
         const reliableBadge = r.reliable
-          ? '<span title="In reliable backtest group" style="color:#fbbf24;font-size:13px">★</span>'
-          : '<span style="color:#334155">—</span>';
+          ? '<span title="In reliable backtest group" style="color:#fbbf24;font-size:13px">&#9733;</span>'
+          : '<span style="color:#334155">&#8212;</span>';
 
         const lowConvNote = r.low_conv
           ? '<span style="color:#475569;font-size:10px"> Low conv</span>'
@@ -427,6 +465,23 @@
           <td class="px-4 py-2.5 text-center">${reliableBadge}</td>
         </tr>`;
       }).join('');
+
+      const totalPages = Math.ceil(_currentRows.length / PAGE_SIZE);
+      document.getElementById('pageStart').textContent = _currentRows.length ? start + 1 : 0;
+      document.getElementById('pageEnd').textContent   = end;
+      document.getElementById('pageTotal').textContent = _currentRows.length;
+      document.getElementById('pageLabel').textContent = `Page ${_currentPage + 1} of ${totalPages || 1}`;
+      document.getElementById('pagePrev').disabled = _currentPage === 0;
+      document.getElementById('pageNext').disabled = _currentPage >= totalPages - 1;
+      document.getElementById('pagePrev').style.opacity = _currentPage === 0 ? '0.35' : '1';
+      document.getElementById('pageNext').style.opacity = _currentPage >= totalPages - 1 ? '0.35' : '1';
+    }
+
+    function changePage(dir) {
+      const totalPages = Math.ceil(_currentRows.length / PAGE_SIZE);
+      _currentPage = Math.max(0, Math.min(_currentPage + dir, totalPages - 1));
+      renderPage();
+      document.getElementById('filingsTable').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function filterFilings(mode) {
@@ -435,6 +490,7 @@
       let rows = FILINGS;
       if (mode === 'purchase') rows = rows.filter(r => r.txn === 'Purchase');
       if (mode === 'sale')     rows = rows.filter(r => r.txn === 'Sale');
+      if (mode === 'options')  rows = rows.filter(r => r.type === 'OP');
       if (mode === 'reliable') rows = rows.filter(r => r.reliable);
       renderFilings(rows);
     }
@@ -473,7 +529,7 @@
             </div>
             <div class="flex gap-3">
               <span class="w-16 shrink-0" style="color:#64748b">Filter</span>
-              <span><span id="live-reliable-count">37</span> reliable politicians (positive excess + ≥5 trades)</span>
+              <span><span id="live-reliable-count">12</span> reliable politicians (avg excess &gt;2%, ≥20 trades)</span>
             </div>
             <div class="flex gap-3">
               <span class="w-16 shrink-0" style="color:#64748b">Exclude</span>
@@ -572,10 +628,11 @@
           <p class="text-sm leading-relaxed" style="color:#94a3b8">
             This is a <strong style="color:#cbd5e1">research and education project</strong>.
             Congressional disclosure patterns are one signal derived from public STOCK Act filings —
-            not a trading strategy guarantee. The 37 "reliable" politicians were
+            not a trading strategy guarantee. The <span id="caveat-reliable-count">12</span> "reliable" politicians were
             <strong style="color:#cbd5e1">selected in-sample</strong> from the same 2022–2026 data
-            the backtest runs on — under the null, roughly half of 73 tested politicians show positive
-            excess by chance alone. Sample sizes per politician are small; high excess returns may
+            the backtest runs on (tightened from an initial screen of 37 to require avg excess &gt;2% and ≥20 trades).
+            Even with stricter criteria, in-sample selection inflates apparent returns.
+            Sample sizes per politician are small; high excess returns may
             reflect a specific period or sector rather than persistent edge.
             Do your own analysis before making any investment decisions.
           </p>
@@ -674,7 +731,7 @@
           <div class="text-xs font-semibold uppercase tracking-wide mb-3" style="color:#34d399">3 · Signal</div>
           <p class="text-sm leading-relaxed" style="color:#94a3b8">
             Live disclosures via <strong style="color:#f1f5f9">Quiver Quant API</strong> (12h cache).
-            Filter to the <span id="method-reliable-count">37</span> reliable politicians. Deduplicate accumulation signals.
+            Filter to the <span id="method-reliable-count">12</span> reliable politicians (avg excess &gt;2%, ≥20 trades). Deduplicate accumulation signals.
             Detect deep-ITM call purchases as underlying buy signals.
           </p>
         </div>
@@ -717,7 +774,7 @@
   </footer>
 
   <script>
-    ['live-reliable-count','method-reliable-count'].forEach(function(id) {
+    ['live-reliable-count','method-reliable-count','caveat-reliable-count'].forEach(function(id) {
       var el = document.getElementById(id);
       if (el) el.textContent = STATS.reliable_count;
     });

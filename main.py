@@ -4,6 +4,8 @@ Entry point for the congress trades research tool.
   python main.py congress            — latest congress trades via Quiver Quant API
   python main.py followcongress      — backtest following politicians' disclosures
   python main.py paircongress        — match buy/sell pairs, analyse sell-lag drift
+  python main.py congressoptions     — options overview, Tuberville straddles, House calls
+  python main.py optionsreliable     — rank politicians by their options-signal alpha
   python main.py account             — Alpaca paper account status + open positions
   python main.py live                — run live paper trading strategy
   python main.py live --dry-run      — simulate strategy without placing orders
@@ -93,8 +95,9 @@ def cmd_followcongress():
     print(f"\n--- All politicians ranked by avg excess return (hold={hold_days}d) ---")
     print_rankings(rankings, hold_days)
 
-    reliable = rankings[(rankings["avg_excess"] > 0) & (rankings["trades"] >= 5)]
-    print(f"\n--- Reliable group ({len(reliable)} politicians with positive excess + 5+ trades) ---")
+    from config import RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES
+    reliable = rankings[(rankings["avg_excess"] > RELIABLE_MIN_EXCESS) & (rankings["trades"] >= RELIABLE_MIN_TRADES)]
+    print(f"\n--- Reliable group ({len(reliable)} politicians: excess>{RELIABLE_MIN_EXCESS}%, trades>={RELIABLE_MIN_TRADES}) ---")
     group = simulate_group(results, reliable["politician"].tolist())
     print_group_result(group)
 
@@ -108,9 +111,9 @@ def cmd_followcongress():
     print("  " + "-" * 40)
     sensitivity_rows = []
     for hd in [10, 20, 30, 60, 90]:
-        r2 = run_politician_backtest(df, hold_days=hd, min_trades=5, closes=closes)
+        r2 = run_politician_backtest(df, hold_days=hd, min_trades=min_trades, closes=closes)
         rnk2 = rank_politicians(r2)
-        rel2 = rnk2[(rnk2["avg_excess"] > 0) & (rnk2["trades"] >= 5)]
+        rel2 = rnk2[(rnk2["avg_excess"] > RELIABLE_MIN_EXCESS) & (rnk2["trades"] >= RELIABLE_MIN_TRADES)]
         g2 = simulate_group(r2, rel2["politician"].tolist())
         if g2:
             sensitivity_rows.append({
@@ -140,6 +143,105 @@ def cmd_followcongress():
 def cmd_congressoptions():
     from congress.options_analysis import run_options_analysis
     run_options_analysis()
+
+
+def cmd_optionsreliable():
+    """
+    Options-based reliable group analysis.
+    Buy the underlying stock on each call-purchase filing date, hold N days.
+    Shows which politicians generate alpha via their options signals.
+    """
+    from congress.options_analysis import load_options, backtest_options_signals, print_options_rankings
+
+    print("Loading options data (House + Senate)...")
+    df = load_options()
+    print(f"  {len(df)} total options trades  |  {df['name'].nunique()} politicians")
+
+    calls = df[(df["transaction"] == "Purchase") & (df["option_type"] == "Call")]
+    print(f"  {len(calls)} call purchases across {calls['name'].nunique()} politicians")
+
+    # All call purchases
+    print("\nRunning backtest: all call purchases (buy underlying on filing date)...")
+    all_calls = backtest_options_signals(df, hold_days_list=[30, 60, 90])
+    print_options_rankings(all_calls, deep_itm=False)
+
+    # Deep ITM only (strike/price < 0.85)
+    deep_itm_calls = df[df["strike"].notna()]
+    n_with_strike = len(deep_itm_calls[(deep_itm_calls["transaction"] == "Purchase") & (deep_itm_calls["option_type"] == "Call")])
+    print(f"\n  ({n_with_strike} call purchases have known strike price for deep ITM filter)")
+
+    if n_with_strike > 0:
+        print("\nRunning backtest: deep ITM calls only (strike/price < 0.85)...")
+        deep_rankings = backtest_options_signals(df, hold_days_list=[30, 60, 90], deep_itm_only=True)
+        print_options_rankings(deep_rankings, deep_itm=True)
+
+    # Check specific politicians
+    target_pols = ["Pelosi", "Gottheimer", "Ross", "Bresnahan"]
+    print(f"\n{'='*70}")
+    print(f"  Focus: {', '.join(target_pols)} (current options signal group)")
+    print(f"{'='*70}")
+    for hold, rdf in sorted(all_calls.items()):
+        if rdf.empty:
+            continue
+        print(f"\n  Hold {hold}d:")
+        for target in target_pols:
+            match = rdf[rdf["politician"].str.contains(target, na=False, regex=False)]
+            if match.empty:
+                print(f"    {target:<20} -- not enough data (< 2 signals)")
+            else:
+                row = match.iloc[0]
+                print(f"    {row['politician']:<32}  {int(row['trades'])} trades  "
+                      f"excess={row['avg_excess']:>+.1f}%  win={row['win_rate']:.0f}%")
+
+
+def cmd_strategy2():
+    """
+    Strategy 2 backtest: buy on filing date, hold until politician files sell + N days.
+    Tests the sell-lag signal as an exit trigger vs fixed 90d hold.
+    Filters to reliable politician group if congress_rankings.csv exists.
+    """
+    import os
+    import pandas as pd
+    from congress.loader import load_historical
+    from congress.trade_pairs import build_pairs, strategy2_sensitivity
+
+    print("Loading scraped congress trades (House + Senate)...")
+    df = load_historical()
+    print(f"  {len(df):,} trades loaded\n")
+
+    print("Building buy/sell pairs...")
+    pairs = build_pairs(df)
+    print(f"  {len(pairs)} matched pairs\n")
+
+    reliable_pols = None
+    if os.path.exists("congress_rankings.csv"):
+        from config import RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES
+        rankings = pd.read_csv("congress_rankings.csv")
+        reliable = rankings[(rankings["avg_excess"] > RELIABLE_MIN_EXCESS) & (rankings["trades"] >= RELIABLE_MIN_TRADES)]
+        reliable_pols = set(reliable["politician"].tolist())
+        print(f"  Filtering to {len(reliable_pols)} reliable politicians (excess>{RELIABLE_MIN_EXCESS}%, trades>={RELIABLE_MIN_TRADES})")
+    else:
+        print("  No congress_rankings.csv found — using all politicians")
+
+    print()
+    results = strategy2_sensitivity(pairs, reliable_pols=reliable_pols)
+
+    if results.empty:
+        print("  No results — not enough matched pairs with price data.")
+        return
+
+    print(f"\n--- Strategy 2: buy on buy_filed, exit on sell_filed + N days ---")
+    print(f"  (Strategy 1 benchmark: buy on buy_filed, exit after fixed 90d -- +2.4% excess)\n")
+    print(f"  {'Hold after sell':>16}  {'Pairs':>6}  {'Avg Ret':>8}  {'SPY':>7}  {'Excess':>8}  {'Win%':>6}")
+    print("  " + "-" * 62)
+    for _, row in results.iterrows():
+        label = f"sell_filed +{int(row['hold_after_sell_d'])}d"
+        marker = " <--" if row['excess'] == results['excess'].max() else ""
+        print(
+            f"  {label:>16}  {int(row['pairs']):>6}  "
+            f"{row['avg_ret']:>+7.1f}%  {row['spy']:>+6.1f}%  "
+            f"{row['excess']:>+7.1f}%  {row['win_pct']:>5.1f}%{marker}"
+        )
 
 
 def cmd_paircongress():
@@ -204,25 +306,31 @@ def _write_data_js(sensitivity: list, generated: str, reliable_count: int, polit
     import pandas as pd
     from congress.strategy import match_politician
 
-    # Curated filings — max 2 per politician, 25 total
+    # Last 90 days of filings — all rows, no per-politician cap
     filings = []
     if os.path.exists("congress_trades.csv") and os.path.exists("congress_rankings.csv"):
         df_t = pd.read_csv("congress_trades.csv")
         df_t["ReportDate"] = pd.to_datetime(df_t["ReportDate"], errors="coerce")
         df_t = df_t.dropna(subset=["ReportDate", "Ticker", "Representative"])
-        df_t = df_t.sort_values("ReportDate", ascending=False)
+        cutoff = pd.Timestamp.today() - pd.Timedelta(days=90)
+        df_t = df_t[df_t["ReportDate"] >= cutoff].sort_values("ReportDate", ascending=False)
 
         df_r = pd.read_csv("congress_rankings.csv")
-        reliable_pols = {r["politician"]: {} for _, r in df_r[df_r["avg_excess"] > 0].iterrows()}
+        from config import RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES
+        from congress.strategy import KNOWN_OPTIONS_POLITICIANS, _matches_options_politician
+        reliable_pols = {r["politician"]: {} for _, r in df_r[(df_r["avg_excess"] > RELIABLE_MIN_EXCESS) & (df_r["trades"] >= RELIABLE_MIN_TRADES)].iterrows()}
 
-        seen: dict[str, int] = {}
         for _, row in df_t.iterrows():
-            pol = str(row["Representative"])
-            if seen.get(pol, 0) >= 2:
-                continue
+            pol    = str(row["Representative"])
             tx_dt  = pd.to_datetime(row.get("TransactionDate"), errors="coerce")
             amount = str(row.get("Range", ""))
             t_type = str(row.get("TickerType", "ST"))
+            is_opt = t_type == "OP"
+            # Star if: stock reliable group (any trade), OR options politician on an options trade
+            is_reliable = (
+                match_politician(pol, reliable_pols) or
+                (is_opt and _matches_options_politician(pol))
+            )
             filings.append({
                 "date":     str(row["ReportDate"].date()),
                 "tx_date":  str(tx_dt.date()) if pd.notna(tx_dt) else "",
@@ -232,12 +340,9 @@ def _write_data_js(sensitivity: list, generated: str, reliable_count: int, polit
                 "type":     t_type if t_type in ("ST", "OP") else "ST",
                 "txn":      str(row.get("Transaction", "")),
                 "range":    amount,
-                "reliable": match_politician(pol, reliable_pols),
+                "reliable": is_reliable,
                 "low_conv": amount.strip().startswith("$1,001"),
             })
-            seen[pol] = seen.get(pol, 0) + 1
-            if len(filings) >= 25:
-                break
 
     # Total options count from scraped CSVs
     total_options = 0
@@ -312,7 +417,8 @@ def cmd_export():
         {"name": _shorten_name(r["politician"]), "excess": round(float(r["avg_excess"]), 1), "trades": int(r["trades"])}
         for _, r in top12.iterrows()
     ]
-    reliable_count = int((df_r["avg_excess"] > 0).sum())
+    from config import RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES
+    reliable_count = int(((df_r["avg_excess"] > RELIABLE_MIN_EXCESS) & (df_r["trades"] >= RELIABLE_MIN_TRADES)).sum())
 
     sensitivity = _read_existing_sensitivity()
     if not sensitivity:
@@ -325,6 +431,8 @@ COMMANDS = {
     "followcongress":  cmd_followcongress,
     "paircongress":    cmd_paircongress,
     "congressoptions": cmd_congressoptions,
+    "optionsreliable": cmd_optionsreliable,
+    "strategy2":       cmd_strategy2,
     "account":         cmd_account,
     "live":            cmd_live,
     "export":          cmd_export,
@@ -333,6 +441,6 @@ COMMANDS = {
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else None
     if cmd not in COMMANDS:
-        print("Usage: python main.py [congress | followcongress | paircongress | congressoptions | account | live]")
+        print("Usage: python main.py [congress | followcongress | paircongress | congressoptions | optionsreliable | account | live]")
         sys.exit(1)
     COMMANDS[cmd]()

@@ -242,6 +242,62 @@ def print_pair_summary(pairs_df: pd.DataFrame) -> None:
               f"  {row['avg_move_during_lag']:>+10.1f}%  {row['pct_negative']:>9.0f}%")
 
 
+def strategy2_sensitivity(
+    pairs: list[TradePair],
+    hold_after_sell: list[int] | None = None,
+    reliable_pols: set[str] | None = None,
+) -> pd.DataFrame:
+    """
+    Strategy 2: buy on buy_filed, hold until sell_filed + N days.
+    Tests whether holding past the sell filing adds return vs SPY.
+
+    hold_after_sell: days to hold past sell_filed to test [default: 0,10,20,30,60,90]
+    reliable_pols:   if provided, filter to only these politicians
+    """
+    if hold_after_sell is None:
+        hold_after_sell = [0, 10, 20, 30, 60, 90]
+
+    filtered = [p for p in pairs if reliable_pols is None or p.politician in reliable_pols]
+    if not filtered:
+        return pd.DataFrame()
+
+    tickers = list({p.ticker for p in filtered})
+    start   = min(p.buy_filed for p in filtered)
+    end     = max(p.sell_filed for p in filtered) + timedelta(days=max(hold_after_sell) + 10)
+
+    print(f"  Fetching prices for {len(tickers)} tickers (strategy 2)...")
+    closes = fetch_daily_closes(tickers, start, end)
+
+    rows = []
+    for n in hold_after_sell:
+        returns, spy_rets = [], []
+        for p in filtered:
+            entry     = _price_on_or_after(closes, p.ticker, p.buy_filed)
+            spy_entry = _price_on_or_after(closes, "SPY",    p.buy_filed)
+            exit_date = p.sell_filed + timedelta(days=n)
+            exit_p    = _price_on_or_after(closes, p.ticker, exit_date)
+            spy_exit  = _price_on_or_after(closes, "SPY",    exit_date)
+            if not all([entry, spy_entry, exit_p, spy_exit]):
+                continue
+            ret     = (exit_p   - entry)     / entry     * 100
+            spy_ret = (spy_exit - spy_entry) / spy_entry * 100
+            returns.append(ret)
+            spy_rets.append(spy_ret)
+
+        if returns:
+            excess = [r - s for r, s in zip(returns, spy_rets)]
+            rows.append({
+                "hold_after_sell_d": n,
+                "pairs":    len(returns),
+                "avg_ret":  round(np.mean(returns), 2),
+                "spy":      round(np.mean(spy_rets), 2),
+                "excess":   round(np.mean(excess), 2),
+                "win_pct":  round(sum(1 for e in excess if e > 0) / len(excess) * 100, 1),
+            })
+
+    return pd.DataFrame(rows)
+
+
 def run_pair_analysis(df: pd.DataFrame | None = None, csv_path: str | None = None) -> pd.DataFrame:
     """Main entry point. Accepts a pre-loaded DataFrame or a CSV path."""
     if df is None:

@@ -24,6 +24,7 @@ import pandas as pd
 from config import (
     HOLD_DAYS, OPTIONS_HOLD_DAYS, MAX_POSITIONS, POSITION_SIZE_PCT,
     SIGNAL_LOOKBACK, OPTIONS_LOOKBACK, DEEP_ITM_THRESHOLD,
+    RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES, MAX_SIGNAL_AGE,
 )
 
 # Known options-active politicians whose deep-ITM calls signal the underlying.
@@ -72,7 +73,7 @@ def load_reliable_politicians(rankings_csv: str = "congress_rankings.csv") -> di
 
     try:
         df = pd.read_csv(rankings_csv)
-        reliable = df[(df["avg_excess"] > 0) & (df["trades"] >= 5)]
+        reliable = df[(df["avg_excess"] > RELIABLE_MIN_EXCESS) & (df["trades"] >= RELIABLE_MIN_TRADES)]
     except (KeyError, Exception) as e:
         print(f"  [warn] could not parse {rankings_csv}: {e} — using embedded fallback list")
         return _FALLBACK_RELIABLE
@@ -116,7 +117,7 @@ def detect_new_signals(
     seen: set,
     reliable_pols: dict,
     lookback_days: int = SIGNAL_LOOKBACK,
-    max_age_days: int = 3,
+    max_age_days: int = MAX_SIGNAL_AGE,
 ) -> list[dict]:
     """
     Find purchase disclosures in the last lookback_days from reliable politicians.
@@ -227,7 +228,7 @@ def detect_options_signals(
     seen: set,
     current_prices: dict,
     lookback_days: int = OPTIONS_LOOKBACK,
-    max_age_days: int = 3,
+    max_age_days: int = MAX_SIGNAL_AGE,
 ) -> list[dict]:
     """
     Find deep-ITM call purchases by known options-active politicians.

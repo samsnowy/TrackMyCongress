@@ -19,7 +19,7 @@ Find exploitable patterns in congressional stock trade disclosures. Three hypoth
 | `senate_historical.csv` | ~4,000 stock trades | Complete (Senate, 2022–2026) |
 | `senate_options.csv` | 306 trades | Complete (Senate) |
 | `congress_trades.csv` | ~1,000 trades | Quiver API cache (separate, live) |
-| `congress_rankings.csv` | 37 politicians | Generated from 90d backtest |
+| `congress_rankings.csv` | 12 politicians | Generated from 90d backtest (excess >2%, ≥20 trades) |
 
 Combined: ~10,000 stock trades, 462 options, ~170 members across both chambers.
 
@@ -36,7 +36,7 @@ Done. `congress/loader.py` normalises scraped CSVs to backtest schema.
 
 Done. See [FINDINGS.md](FINDINGS.md) for full results.
 
-**Summary:** Clear alpha signal, grows with hold period (+0.6% excess at 10d → +2.3% at 90d).
+**Summary:** Clear alpha signal, grows with hold period (+0.6% excess at 10d → +2.4% at 90d).
 Best politicians at 90d: Daniel Sullivan (+14.8%), Mark Green (+13.8%), Tim Moore (+12.9%), David McCormick (+8.9%), Cleo Fields (+6.3%).
 
 ---
@@ -71,7 +71,7 @@ Done. Running on Alpaca paper account ($1,000,000 simulated equity).
 
 | Signal | Source | Filter | Hold |
 |---|---|---|---|
-| Stock purchase | Quiver live feed (7d lookback) | Reliable group (37 pols, positive excess + ≥5 trades) + exclude $1k-$15k | 90 days |
+| Stock purchase | Quiver live feed (7d lookback) | Reliable group (12 pols, avg excess >2% + ≥20 trades) + exclude $1k-$15k | 90 days |
 | Deep ITM call | Quiver `TickerType==OP` (30d lookback) | Gottheimer / Pelosi / Ross / Bresnahan + strike/price < 0.85 | 30 days |
 
 **Sizing:** 5% of equity per position, max 15 simultaneous positions.  
@@ -87,9 +87,18 @@ Done. Running on Alpaca paper account ($1,000,000 simulated equity).
 Steps needed to confirm the edge is real and not an in-sample artifact:
 
 - **Walk-forward test** — rank politicians on 2022–2023 data only, then run the backtest on 2024–2026 without touching the training split. If the same names outperform out-of-sample, that's genuine signal.
-- **Permutation test** — randomly shuffle politician→ticker assignments and rerun the backtest 1,000 times to build a null distribution. Check where the observed +2.3% excess sits. If it's in the top 5%, the result is unlikely to be noise.
+- **Permutation test** — randomly shuffle politician→ticker assignments and rerun the backtest 1,000 times to build a null distribution. Check where the observed +2.4% excess sits. If it's in the top 5%, the result is unlikely to be noise.
 - **Transaction cost sensitivity** — rerun the backtest at 0.25%, 0.5%, and 1.0% round-trip friction. Identify the break-even cost where the edge disappears.
 - **Risk-adjusted returns** — compute beta of the follow-congress portfolio vs SPY and derive alpha. If excess returns vanish after beta adjustment, the strategy is just holding higher-volatility stocks, not exploiting an informational edge.
+
+---
+
+## Strategy Architecture TODOs
+
+Known design gaps in the live strategy worth addressing:
+
+- **Per-politician position tracking** — currently positions are keyed by ticker, so a second reliable politician buying the same stock is silently skipped. A better model keys positions on `(ticker, politician)`, allowing multiple tranches in the same stock. Each tranche would be sized independently at 5% and exit on its own timeline. Requires Alpaca position math to be managed manually in state.
+- **Sell signal monitoring** — the live strategy has no awareness of sell filings. Currently exits are purely time-based (90 days from filing). With per-politician tracking, the natural exit rule becomes: close a tranche when the *same politician who triggered entry* files a sell on that ticker, OR after 90 days — whichever comes first. The sell-lag research showed sells average +1.7% drift during the lag, so exiting 30 days *after* the sell filing may outperform exiting on the filing date itself.
 
 ---
 
