@@ -4,7 +4,7 @@ Results from running the congress trade analysis. Updated as new analysis is run
 
 ---
 
-## Dataset (as of 2026-04-30)
+## Dataset (as of 2026-05-06)
 
 | Source | Stocks | Options | Members | Date Range |
 |---|---|---|---|---|
@@ -23,23 +23,25 @@ Only 9 House reps and ~15 senators traded options at all. Options trading is hig
 
 **Setup:** Buy at close on `ReportDate` (first day you realistically know about the trade). Hold N days. Compare return vs SPY over same window. Excess = trade return minus SPY return over the identical window.
 
-**Dataset:** 4,568 purchases, 73 politicians with ≥5 trades, 2022–2026.
+**Dataset:** 4,570 purchases, 114 politicians, 2022–2026.
 
 ### Holding Period Sensitivity — Reliable Group
 
-Reliable = avg excess >2% AND ≥20 trades (tightened from original excess>0/≥5 trades screen of 37 politicians down to 12).
+Reliable = avg excess >2% AND ≥20 trades. The reliable group is recomputed at each hold period, so the politician composition (and trade count) varies slightly — politicians who outperform at short holds differ from those who outperform at long holds.
 
-| Hold | Total trades | Avg Excess | Win% | Avg Ret | SPY |
-|------|-------------|-----------|------|---------|-----|
-| 10d  | 2,754       | +0.6%     | 53%  | +1.0%   | +0.4% |
-| 20d  | 2,961       | +0.8%     | 53%  | +1.6%   | +0.8% |
-| 30d  | 2,708       | +1.1%     | 51%  | +2.5%   | +1.4% |
-| 60d  | 2,205       | +2.0%     | 53%  | +5.2%   | +3.3% |
-| 90d  | 2,237       | +2.4%     | 51%  | +6.9%   | +4.5% |
+> **Note on the old 2.4% number:** earlier versions of this analysis used a loose filter (>0% excess, ≥5 trades), which included noise traders with tiny sample sizes. Tightening to >2%/≥20 trades removed those and raised the measured excess to 4.8% at 90d on the same dataset. The 2.4% was diluted by chance winners, not a different strategy.
 
-**Key observation:** alpha grows consistently with hold period. Strongest signal at 90 days (+2.4% excess). Win rate hovers around 50–53% regardless of hold — the edge is in the magnitude of wins, not win frequency.
+| Hold | Trades | Avg Excess | Win% | Avg Ret | SPY |
+|------|--------|-----------|------|---------|-----|
+| 10d  | 164    | +2.6%     | 68%  | +3.6%   | +1.0% |
+| 20d  | 95     | +4.9%     | 70%  | +6.1%   | +1.2% |
+| 30d  | 158    | +5.4%     | 66%  | +7.0%   | +1.6% |
+| 60d  | 476    | +4.8%     | 61%  | +7.8%   | +3.0% |
+| 90d  | 672    | +4.8%     | 55%  | +9.2%   | +4.3% |
 
-### Full Reliable Group at 90d (congress_rankings.csv, generated 2026-05-05)
+**Key observation:** alpha peaks in the 20–30d range (+5.4%) and remains strong at 90d (+4.8%). Win rate is notably higher at short holds (68–70%) then compresses toward 55% at 90d — the short-hold signal may be detecting fast-moving accumulation events. The edge at 90d comes from magnitude (big winners), not win frequency.
+
+### Full Reliable Group at 90d (congress_rankings.csv, generated 2026-05-06)
 
 12 politicians with avg excess >2% and ≥20 trades on the combined House + Senate dataset.
 
@@ -62,14 +64,43 @@ Most statistically meaningful (high trade count + excess): **Cleo Fields (81 tra
 
 ### Interpretation
 
-- ~2,200 trades in the reliable group is a reasonable sample
-- The signal strengthens with time — consistent with informational edge that plays out over months
-- Win rate ~50% means pure coin-flip on direction; the edge comes from asymmetric return distribution
+- 672 trades in the 12-pol reliable group at 90d is the all-trades baseline
+- The edge peaks at 20–30d and remains meaningful at 90d — consistent with an informational signal that plays out over months
+- Short-hold win rates (68–70%) are unusually high — worth investigating whether this is data noise or a real fast-signal effect
 - Best trade: IREN held by Cleo Fields (+256.7% excess). Worst: CNC held by Gilbert Cisneros (-69.4% excess)
 
 ### In-sample caveat
 
-The 37 "reliable" politicians were selected using the same 2022–2026 dataset the backtest runs on — there is no out-of-sample validation. Under the null hypothesis (all politicians are noise), roughly half of 73 tested politicians would show positive excess by chance alone, which is close to the observed 37. The filter threshold (positive excess + ≥5 trades) is also weak enough that some entries may be noise survivors rather than genuine signal sources. The live strategy treats this list as a starting hypothesis, not a validated edge. Regenerate `congress_rankings.csv` periodically as new data accumulates to update the list with fresher signal.
+The 12 "reliable" politicians were selected using the same 2022–2026 dataset the backtest runs on — there is no out-of-sample validation. Under the null hypothesis, roughly half of 114 tested politicians would show positive excess by chance alone. The >2%/≥20 trades filter is stricter than before but still in-sample. Regenerate `congress_rankings.csv` periodically as new data accumulates to track whether these politicians remain consistent.
+
+---
+
+## High-Conviction Strategy (Step 5)
+
+**Setup:** Same as Follow-Disclosure, but restricted to trades filed with amounts >$15k (excludes the `$1,001–$15,000` bracket). 78% of all filings are in that low-conviction bracket. The hypothesis: when a politician puts meaningful money down, the signal is stronger.
+
+**HC reliable group:** 4 politicians with avg excess >2% and ≥20 high-conviction (>$15k) trades.
+
+| Politician | HC Trades | Avg Excess | Win% |
+|---|---|---|---|
+| Tim Moore | 38 | +12.2% | — |
+| David McCormick | 24 | +8.9% | — |
+| Cleo Fields | 64 | +7.1% | — |
+| Virginia Foxx | 28 | +2.8% | — |
+
+### HC Holding Period Sensitivity
+
+| Hold | Trades | Avg Excess | Win% | Avg Ret | SPY |
+|------|--------|-----------|------|---------|-----|
+| 10d  | 38     | +2.5%     | 71%  | +3.3%   | +0.8% |
+| 20d  | 62     | +5.9%     | 77%  | +6.5%   | +0.6% |
+| 30d  | 90     | +5.9%     | 69%  | +6.6%   | +0.8% |
+| 60d  | 154    | +7.7%     | 60%  | +11.5%  | +3.7% |
+| 90d  | 154    | **+7.9%** | 64%  | +13.0%  | +5.1% |
+
+**Key finding:** restricting to meaningful-size trades (+7.9% at 90d) nearly doubles the excess vs all-trades (+4.8%). The HC group also has better win rates across all hold periods (64% at 90d vs 55% for all-trades). This is the live strategy.
+
+**Why Strategy 2 (sell-filing exit) doesn't work for HC:** only 30 matched buy/sell pairs exist for the 4 HC politicians — too small a sample for a stable signal.
 
 ---
 
@@ -175,7 +206,7 @@ Exercise events are absent from all data sources — they do not appear as stock
 | sell_filed +60d | 334 | +15.1% | +11.4% | +3.6% | 47% |
 | sell_filed +90d | 334 | +17.4% | +13.6% | +3.8% | 43% |
 
-**Strategy 1 benchmark:** fixed 90d hold → +2.4% excess, 51% win rate.
+**Strategy 1 benchmark:** fixed 90d hold → +4.8% excess (12-pol strict filter), 55% win rate.
 
 **Key findings:**
 - +10d after sell filing is the sweet spot at +4.0% excess — beats Strategy 1 by +1.6% with 49% win rate

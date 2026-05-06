@@ -18,30 +18,29 @@ Members of Congress must publicly disclose stock trades within 45 days of the tr
 
 Buy at close on the day a trade is publicly filed. Hold N days. Compare to SPY over the same window.
 
-| Hold | Reliable politicians | Trades | Avg Excess | Win% |
-|------|---------------------|--------|------------|------|
-| 10d  | 2,754  | +0.6%      | 53%  |
-| 30d  | 2,708  | +1.1%      | 51%  |
-| 60d  | 2,205  | +2.0%      | 53%  |
-| 90d  | 2,237  | **+2.4%**  | 51%  |
+| Hold | Trades | Avg Excess | Win% |
+|------|--------|------------|------|
+| 10d  | 164    | +2.6%      | 68%  |
+| 30d  | 158    | +5.4%      | 66%  |
+| 60d  | 476    | +4.8%      | 61%  |
+| 90d  | 672    | **+4.8%**  | 55%  |
 
-"Reliable" = 12 politicians with avg excess >2% and ≥20 trades in the dataset.
+"Reliable" = 12 politicians with avg excess >2% and ≥20 trades (strict filter). Alpha peaks at 20–30d hold and stays strong at 90d. Win rate is notably high at short holds (66–70%) then compresses — the edge at 90d comes from magnitude (big winners), not win rate.
 
-The edge isn't in win rate (hovers ~50–53% regardless of hold period) — it's in the asymmetric return distribution. Alpha grows consistently with time, consistent with an informational edge that plays out over months.
+**High-conviction filter (>$15k trades, 4 politicians):** +7.9% excess at 90d, 64% win rate — the live strategy.
 
-### 2. Top Performers at 90-Day Hold
+### 2. Top Performers at 90-Day Hold (all-trades, ≥20 trades)
 
 | Politician | Trades | Avg Excess | Win% |
 |---|---|---|---|
 | Daniel Sullivan (R-AK, Senate) | 40 | **+14.8%** | 87.5% |
-| Mark Green (R-TN, House) | 9 | **+13.8%** | 100.0% |
 | Tim Moore (R-NC, House) | 41 | **+12.9%** | 65.9% |
 | David McCormick (R-PA, Senate) | 24 | **+8.9%** | 83.3% |
 | Cleo Fields (D-LA, House) | 81 | **+6.3%** | 61.7% |
-| Josh Gottheimer (D-NJ, House) | 362 | +1.7% | 48.3% |
+| Greg Landsman (D-OH, House) | 22 | +5.8% | 63.6% |
 | Thomas Tuberville (R-AL, Senate) | 285 | +2.1% | 42.8% |
 
-Statistically strongest (high trade count + excess): Cleo Fields (81 trades, +6.3%), Daniel Sullivan (40, +14.8%), Tim Moore (41, +12.9%).
+Note: earlier analysis included politicians with only 5–9 trades (e.g., Mark Green with 9 trades at +13.8%) — those are likely noise and are excluded by the ≥20 trades floor. Statistically strongest (large sample + high excess): Cleo Fields, Tim Moore, Daniel Sullivan.
 
 ### 3. The Sell-Lag Signal Is a Myth
 
@@ -87,12 +86,12 @@ Two signal types, one execution path. State persisted in `strategy_state.json`. 
 
 | Signal | Source | Filter | Hold |
 |--------|--------|--------|------|
-| Stock purchase | Quiver live feed (7-day lookback) | Reliable group (12 pols, avg excess >2% + ≥20 trades) + exclude $1k–$15k filings | 90 days |
+| Stock purchase | Quiver live feed (7-day lookback) | HC group (4 pols, >$15k trades, avg excess >2% + ≥20 HC trades) | 90 days |
 | Deep ITM call | Quiver `TickerType==OP` (30-day lookback) | Gottheimer / Pelosi / Ross / Bresnahan + `strike/price < 0.85` | 30 days |
 
 **Sizing:** 5% of equity per position, max 15 simultaneous positions.
 
-Multiple politicians buying the same ticker within the lookback window are deduplicated into one `[ACCUMULATION]` signal.
+Multiple politicians buying the same ticker within the lookback window are deduplicated into one `[ACCUMULATION]` signal. Rankings refreshed daily via `run_daily.bat` → `python main.py highconv`.
 
 ---
 

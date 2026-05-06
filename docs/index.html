@@ -61,8 +61,10 @@
     <p class="text-xl max-w-2xl mb-12 leading-relaxed" style="color:#94a3b8">
       STOCK Act filings are public — members of Congress must disclose trades within 45 days.
       We backtested <strong style="color:#f1f5f9">10,000+ trades</strong> from 170 members against SPY.
-      A 90-day follow-disclosure strategy outperforms by
-      <strong style="color:#34d399" id="hero-avg-excess">+2.4%</strong> on average — and the edge grows with time.
+      Following the reliable group beats SPY by
+      <strong style="color:#34d399" id="hero-avg-excess">+4.8%</strong> at 90 days —
+      and filtering to high-conviction trades (&gt;$15k) from just 4 politicians pushes that to
+      <strong style="color:#f59e0b" id="hero-hc-excess">+7.9%</strong>.
     </p>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="card p-5">
@@ -74,12 +76,12 @@
         <div class="text-sm mt-1" style="color:#94a3b8">Options trades</div>
       </div>
       <div class="card p-5">
-        <div class="text-3xl font-bold" id="stat-avg-excess" style="color:#34d399">+2.3%</div>
-        <div class="text-sm mt-1" style="color:#94a3b8">Avg excess return at 90d</div>
+        <div class="text-3xl font-bold" id="stat-avg-excess" style="color:#34d399">+4.8%</div>
+        <div class="text-sm mt-1" style="color:#94a3b8">90d excess — 12-pol all-trades</div>
       </div>
       <div class="card p-5">
-        <div class="text-3xl font-bold" id="stat-reliable-count">37</div>
-        <div class="text-sm mt-1" style="color:#94a3b8">Reliable politicians</div>
+        <div class="text-3xl font-bold" id="stat-hc-excess" style="color:#f59e0b">+7.9%</div>
+        <div class="text-sm mt-1" style="color:#94a3b8">90d excess — HC strategy (live)</div>
       </div>
     </div>
   </section>
@@ -485,7 +487,9 @@
     document.getElementById('stat-total-options').textContent = STATS.total_options;
     document.getElementById('stat-avg-excess').textContent   = '+' + STATS.avg_excess_90d + '%';
     document.getElementById('hero-avg-excess').textContent   = '+' + STATS.avg_excess_90d + '%';
-    document.getElementById('stat-reliable-count').textContent = STATS.reliable_count;
+    var hcExcess90 = HC_SENSITIVITY.length ? HC_SENSITIVITY[HC_SENSITIVITY.length - 1].excess : 7.9;
+    document.getElementById('stat-hc-excess').textContent  = '+' + hcExcess90 + '%';
+    document.getElementById('hero-hc-excess').textContent  = '+' + hcExcess90 + '%';
     document.getElementById('snapshot-date').textContent = 'Snapshot: ' + DATA_GENERATED + '.';
     ['caption-reliable-count','subtitle-reliable-count'].forEach(function(id) {
       var el = document.getElementById(id);

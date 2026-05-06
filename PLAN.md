@@ -19,7 +19,8 @@ Find exploitable patterns in congressional stock trade disclosures. Three hypoth
 | `senate_historical.csv` | ~4,000 stock trades | Complete (Senate, 2022–2026) |
 | `senate_options.csv` | 306 trades | Complete (Senate) |
 | `congress_trades.csv` | ~1,000 trades | Quiver API cache (separate, live) |
-| `congress_rankings.csv` | 12 politicians | Generated from 90d backtest (excess >2%, ≥20 trades) |
+| `congress_rankings.csv` | 12 politicians | Generated from 90d backtest (excess >2%, ≥20 trades) — all-trades |
+| `congress_rankings_hc.csv` | 4 politicians | HC backtest (>$15k trades, excess >2%, ≥20 HC trades) — live strategy |
 
 Combined: ~10,000 stock trades, 462 options, ~170 members across both chambers.
 
@@ -36,8 +37,9 @@ Done. `congress/loader.py` normalises scraped CSVs to backtest schema.
 
 Done. See [FINDINGS.md](FINDINGS.md) for full results.
 
-**Summary:** Clear alpha signal, grows with hold period (+0.6% excess at 10d → +2.4% at 90d).
-Best politicians at 90d: Daniel Sullivan (+14.8%), Mark Green (+13.8%), Tim Moore (+12.9%), David McCormick (+8.9%), Cleo Fields (+6.3%).
+**Summary:** Clear alpha signal. Strict filter (>2% excess, ≥20 trades) gives 12 reliable politicians at 4.8% excess at 90d. Short-hold win rates are unusually high (68–70% at 10–20d). Best politicians at 90d: Daniel Sullivan (+14.8%), Tim Moore (+12.9%), David McCormick (+8.9%), Cleo Fields (+6.3%).
+
+Note: an earlier loose filter (>0%, ≥5 trades) produced +2.4% at 90d — the lower number was diluted by noise traders with 5-trade sample sizes, not a different strategy.
 
 ---
 
@@ -57,9 +59,13 @@ Done. See [FINDINGS.md](FINDINGS.md) for full results.
 
 ---
 
-## ✅ Step 5 — Accumulation momentum signal
+## ✅ Step 5 — High-conviction strategy
 
-Incorporated directly into the live strategy as a filter rather than a standalone backtest. When multiple reliable politicians file the same ticker within the 7-day lookback window, signals are deduplicated into one `[ACCUMULATION]` entry. No separate backtest run — the follow-disclosure backtest already captures the return; accumulation is treated as a conviction booster.
+Done. See [FINDINGS.md](FINDINGS.md) for full results.
+
+**Summary:** Filtering to trades >$15k (excludes the low-conviction $1k–$15k bracket) reveals 4 HC politicians (Tim Moore, McCormick, Cleo Fields, Virginia Foxx) with +7.9% excess at 90d — nearly double the 12-pol all-trades figure. This is the live strategy. Rankings saved to `congress_rankings_hc.csv`.
+
+Accumulation momentum is incorporated as a signal modifier: multiple politicians filing the same ticker within the lookback window are deduplicated into one `[ACCUMULATION]` entry.
 
 ---
 
@@ -71,12 +77,14 @@ Done. Running on Alpaca paper account ($1,000,000 simulated equity).
 
 | Signal | Source | Filter | Hold |
 |---|---|---|---|
-| Stock purchase | Quiver live feed (7d lookback) | Reliable group (12 pols, avg excess >2% + ≥20 trades) + exclude $1k-$15k | 90 days |
+| Stock purchase | Quiver live feed (7d lookback) | HC group (4 pols, >$15k trades, avg excess >2% + ≥20 HC trades) | 90 days |
 | Deep ITM call | Quiver `TickerType==OP` (30d lookback) | Gottheimer / Pelosi / Ross / Bresnahan + strike/price < 0.85 | 30 days |
 
 **Sizing:** 5% of equity per position, max 15 simultaneous positions.  
 **State:** `strategy_state.json` — open positions, closed positions, seen signal keys.  
 **Run:** `python main.py live` (daily) or `python main.py live --dry-run` to simulate.
+
+**Rankings refresh:** `python main.py highconv` regenerates `congress_rankings_hc.csv` (HC strategy) and `congress_rankings.csv` (all-trades, for site findings). Run daily via `run_daily.bat`.
 
 **First dry run result (2026-04-25):** No stock signals in the 7-day window. One MSFT options signal from Gottheimer's April 8 call purchases (two contracts, same ticker → deduped to one entry). Would buy 117 shares at $424.62, exit May 8.
 
