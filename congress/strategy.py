@@ -60,32 +60,31 @@ _FALLBACK_RELIABLE: dict[str, dict] = {
 def load_reliable_politicians(rankings_csv: str = "congress_rankings.csv") -> dict[str, dict]:
     """
     Load the reliable politician list from a saved backtest rankings CSV.
-    Reliable = positive avg_excess AND >= 5 trades.
-
-    Falls back to the embedded list from FINDINGS.md if the CSV doesn't exist.
-    Generate the CSV with: python main.py followcongress  (choose 'y' to save).
+    Prefers congress_rankings_hc.csv (high-conviction, >$15k trades) when present.
+    Falls back to the embedded list if no CSV exists.
+    Generate with: python main.py highconv  (preferred) or followcongress.
     """
-    rankings_csv = os.path.basename(rankings_csv)  # prevent path traversal
-    if not os.path.exists(rankings_csv):
-        print(f"  [warn] {rankings_csv} not found — using embedded fallback list")
-        print("         Run: python main.py followcongress  (save rankings → y)")
-        return _FALLBACK_RELIABLE
+    # Prefer HC rankings (high-conviction strategy) over all-trades rankings
+    for path in ("congress_rankings_hc.csv", os.path.basename(rankings_csv)):
+        if not os.path.exists(path):
+            continue
+        try:
+            df = pd.read_csv(path)
+            reliable = df[(df["avg_excess"] > RELIABLE_MIN_EXCESS) & (df["trades"] >= RELIABLE_MIN_TRADES)]
+            if reliable.empty:
+                continue
+            label = "HC" if "hc" in path else "all-trades"
+            print(f"  [strategy] loaded {len(reliable)} reliable politicians from {path} ({label})")
+            return {
+                row["politician"]: {"avg_excess": row["avg_excess"], "trades": int(row["trades"])}
+                for _, row in reliable.iterrows()
+            }
+        except Exception as e:
+            print(f"  [warn] could not parse {path}: {e}")
 
-    try:
-        df = pd.read_csv(rankings_csv)
-        reliable = df[(df["avg_excess"] > RELIABLE_MIN_EXCESS) & (df["trades"] >= RELIABLE_MIN_TRADES)]
-    except (KeyError, Exception) as e:
-        print(f"  [warn] could not parse {rankings_csv}: {e} — using embedded fallback list")
-        return _FALLBACK_RELIABLE
-
-    if reliable.empty:
-        print(f"  [warn] no reliable politicians found in {rankings_csv} — using embedded fallback list")
-        return _FALLBACK_RELIABLE
-
-    return {
-        row["politician"]: {"avg_excess": row["avg_excess"], "trades": int(row["trades"])}
-        for _, row in reliable.iterrows()
-    }
+    print("  [warn] no rankings CSV found — using embedded fallback list")
+    print("         Run: python main.py highconv")
+    return _FALLBACK_RELIABLE
 
 
 def _normalize_name(name: str) -> str:

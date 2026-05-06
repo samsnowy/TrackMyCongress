@@ -266,11 +266,11 @@
     <div class="max-w-6xl mx-auto">
       <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#f59e0b">Finding 4 —
         Counterintuitive</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-4">The sell filing is not an exit signal</h2>
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Exit 10 days after the sell filing, not before</h2>
       <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
         Politicians sell 27 days before filing on average. The hypothesis: price drops during this
         undisclosed window, so you should exit when you see the sell filing.
-        The data says the opposite.
+        The data says the opposite — but only hold for about 10 days after.
       </p>
 
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -282,27 +282,125 @@
         <div class="card p-6 text-center">
           <div class="text-xs uppercase tracking-wide mb-2" style="color:#64748b">Median hold before sell</div>
           <div class="text-3xl font-bold">128d</div>
-          <div class="text-sm mt-1" style="color:#64748b">~4 months</div>
+          <div class="text-sm mt-1" style="color:#64748b">~4 months actual hold</div>
         </div>
         <div class="card p-6 text-center">
           <div class="text-xs uppercase tracking-wide mb-2" style="color:#64748b">Price drift during sell lag</div>
           <div class="text-3xl font-bold" style="color:#34d399">+1.7%</div>
-          <div class="text-sm mt-1" style="color:#64748b">Price rises, on average</div>
+          <div class="text-sm mt-1" style="color:#64748b">Price rises while they delay filing</div>
         </div>
         <div class="card p-6 text-center">
-          <div class="text-xs uppercase tracking-wide mb-2" style="color:#64748b">30d after sell filing</div>
-          <div class="text-3xl font-bold" style="color:#34d399">+7.3%</div>
-          <div class="text-sm mt-1" style="color:#64748b">Best avg return point</div>
+          <div class="text-xs uppercase tracking-wide mb-2" style="color:#64748b">Excess at sell filing +10d</div>
+          <div class="text-3xl font-bold" style="color:#34d399">+4.0%</div>
+          <div class="text-sm mt-1" style="color:#64748b">vs SPY — sweet spot exit</div>
+        </div>
+      </div>
+
+      <div class="card p-5 mb-8" style="border-left:4px solid #f59e0b">
+        <p class="text-sm leading-relaxed" style="color:#cbd5e1">
+          <strong class="text-white">Nuanced result.</strong>
+          Don't exit when you see the sell filing — price still drifts up +1.7% during the undisclosed sell window.
+          But don't hold indefinitely either. Strategy 2 backtested exit points from 0 to 90 days past the sell filing:
+          <strong style="color:#f1f5f9">the sweet spot is +10 days</strong> (+4.0% excess vs SPY, 49% win rate).
+          Beyond that, excess return stops growing — the informational edge fades once the sell is public knowledge.
+          One exception: pairs with &gt;60-day disclosure lag show +15.9% avg move — late filers held through outsized moves.
+        </p>
+      </div>
+
+      <!-- Strategy 2 data table + chart -->
+      <div class="grid md:grid-cols-2 gap-8 items-start">
+        <!-- Table -->
+        <div class="card overflow-hidden">
+          <div class="px-5 py-4 border-b" style="border-color:#334155">
+            <h3 class="font-semibold">Exit timing sensitivity</h3>
+            <p class="text-sm mt-0.5" style="color:#94a3b8">Buy on purchase filing, exit on sell filing + N days. 12 reliable politicians.</p>
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b text-xs font-medium uppercase tracking-wide"
+                style="border-color:#334155;color:#64748b">
+                <th class="text-left px-5 py-3">Exit</th>
+                <th class="text-right px-5 py-3">Pairs</th>
+                <th class="text-right px-5 py-3">Avg Ret</th>
+                <th class="text-right px-5 py-3">SPY</th>
+                <th class="text-right px-5 py-3">Excess</th>
+                <th class="text-right px-5 py-3">Win%</th>
+              </tr>
+            </thead>
+            <tbody id="strategy2Body"></tbody>
+          </table>
+          <div class="px-5 py-3 border-t text-xs" style="border-color:#334155;color:#64748b">
+            Strategy 1 benchmark (fixed 90d hold): +2.4% excess, 51% win rate.
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="card p-5">
+          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#64748b">Excess return vs SPY by exit timing</h3>
+          <canvas id="strategy2Chart"></canvas>
+          <p class="text-xs mt-4" style="color:#64748b">
+            Buy on purchase filing date, exit N days after the sell filing. Peak excess at +10d — edge fades quickly once the sell is public.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Finding 5: High-Conviction Strategy -->
+  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#f59e0b">Finding 5 — Concentrated</div>
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">Follow the big trades — 4 politicians, ~5 signals/month</h2>
+      <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
+        78% of purchase filings are in the minimum-disclosure bracket ($1k–$15k). Filtering to trades over $15k
+        leaves 4 politicians with stronger, cleaner signal — and a natural portfolio size of ~15 open positions
+        at any time (5 signals/month × 90-day hold).
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-8 items-start mb-8">
+        <!-- Sensitivity table -->
+        <div class="card overflow-hidden">
+          <div class="px-5 py-4 border-b" style="border-color:#334155">
+            <h3 class="font-semibold">Hold period sensitivity — high-conviction only</h3>
+            <p class="text-sm mt-0.5" style="color:#94a3b8">Purchases &gt;$15k, 4 reliable politicians (≥20 trades, excess &gt;2%).</p>
+          </div>
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b text-xs font-medium uppercase tracking-wide" style="border-color:#334155;color:#64748b">
+                <th class="text-left px-5 py-3">Hold</th>
+                <th class="text-right px-5 py-3">Trades</th>
+                <th class="text-right px-5 py-3">Avg Ret</th>
+                <th class="text-right px-5 py-3">SPY</th>
+                <th class="text-right px-5 py-3">Excess</th>
+                <th class="text-right px-5 py-3">Win%</th>
+              </tr>
+            </thead>
+            <tbody id="hcSensitivityBody"></tbody>
+          </table>
+          <div class="px-5 py-3 border-t text-xs" style="border-color:#334155;color:#64748b">
+            Compare: 12-politician all-trades strategy gives +2.4% excess at 90d (51% win). High-conviction gives +7.9% (64% win).
+          </div>
+        </div>
+
+        <!-- Politicians chart -->
+        <div class="card p-5">
+          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#64748b">High-conviction reliable group — avg excess at 90d</h3>
+          <canvas id="hcPoliticiansChart" style="max-height:260px"></canvas>
+          <p class="text-xs mt-4" style="color:#64748b">
+            Virginia Foxx qualifies historically but has filed zero high-conviction trades in the past 12 months.
+            Active signal sources: Tim Moore, Cleo Fields, David McCormick.
+          </p>
         </div>
       </div>
 
       <div class="card p-5" style="border-left:4px solid #f59e0b">
         <p class="text-sm leading-relaxed" style="color:#cbd5e1">
-          <strong class="text-white">Hypothesis disproved.</strong>
-          Waiting for the sell filing captures an extra +1.7% vs exiting at the actual sell date.
-          Holding 30 days past the sell filing adds another +1.7%.
-          One exception: pairs with &gt;60-day disclosure lag show +15.9% avg move — late filers
-          held through outsized moves.
+          <strong class="text-white">Portfolio math.</strong>
+          At ~5 unique signals/month and a 90-day hold, this strategy runs ~15 open positions in steady state —
+          right at the recommended cap. No position-limit overflow. Each signal represents a politician putting
+          at least $15k of their own money behind the trade, not a minimum-disclosure filing.
+          The 78% of small trades are ignored entirely, which cuts noise without cutting alpha —
+          the high-conviction group's +7.9% excess at 90d is more than 3× the all-trades strategy's +2.4%.
         </p>
       </div>
     </div>
@@ -325,7 +423,9 @@
         <button onclick="filterFilings('purchase')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="purchase">Purchases only</button>
         <button onclick="filterFilings('sale')"      class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="sale">Sales only</button>
         <button onclick="filterFilings('options')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="options">Options only</button>
-        <button onclick="filterFilings('reliable')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="reliable">★ Reliable group only</button>
+        <button onclick="filterFilings('reliable')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="reliable">★ Reliable group</button>
+        <button onclick="filterFilings('signals')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="signals">★ Buy signals</button>
+        <button onclick="filterFilings('hcsignals')" class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="hcsignals">★ HC signals</button>
       </div>
 
       <div class="card overflow-hidden">
@@ -492,6 +592,8 @@
       if (mode === 'sale')     rows = rows.filter(r => r.txn === 'Sale');
       if (mode === 'options')  rows = rows.filter(r => r.type === 'OP');
       if (mode === 'reliable') rows = rows.filter(r => r.reliable);
+      if (mode === 'signals')  rows = rows.filter(r => r.reliable && r.txn === 'Purchase');
+      if (mode === 'hcsignals') rows = rows.filter(r => r.hc && r.txn === 'Purchase');
       renderFilings(rows);
     }
 
@@ -519,8 +621,8 @@
         <div class="card p-6">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-              style="background:#10b98120;color:#34d399">S</div>
-            <h3 class="font-semibold text-lg">Stock Signal</h3>
+              style="background:#f59e0b20;color:#f59e0b">S</div>
+            <h3 class="font-semibold text-lg">Stock Signal — High Conviction</h3>
           </div>
           <div class="space-y-3 text-sm">
             <div class="flex gap-3">
@@ -529,11 +631,11 @@
             </div>
             <div class="flex gap-3">
               <span class="w-16 shrink-0" style="color:#64748b">Filter</span>
-              <span><span id="live-reliable-count">12</span> reliable politicians (avg excess &gt;2%, ≥20 trades)</span>
+              <span>4 politicians — Tim Moore, Cleo Fields, David McCormick, Virginia Foxx</span>
             </div>
             <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Exclude</span>
-              <span>$1k–$15k filings (low conviction)</span>
+              <span class="w-16 shrink-0" style="color:#64748b">Require</span>
+              <span>Trade size &gt;$15k — minimum-disclosure filings ignored</span>
             </div>
             <div class="flex gap-3">
               <span class="w-16 shrink-0" style="color:#64748b">Dedup</span>
@@ -543,6 +645,9 @@
               <span class="w-16 shrink-0" style="color:#64748b">Hold</span>
               <span class="font-bold text-white">90 days</span>
             </div>
+          </div>
+          <div class="mt-4 pt-4 border-t text-xs" style="border-color:#334155;color:#64748b">
+            ~5 signals/month · ~15 open positions at steady state · +7.9% avg excess at 90d
           </div>
         </div>
 
@@ -869,6 +974,138 @@
         }
       }
     });
+
+    // ── High-conviction sensitivity table ─────────────────────────────────
+    (function() {
+      if (typeof HC_SENSITIVITY === 'undefined' || !HC_SENSITIVITY.length) return;
+      const tbody = document.getElementById('hcSensitivityBody');
+      tbody.innerHTML = HC_SENSITIVITY.map((s, i) => {
+        const isLast  = i === HC_SENSITIVITY.length - 1;
+        const boldRow = isLast ? 'font-bold text-white' : 'font-medium';
+        const exBold  = isLast ? 'font-bold text-base'  : 'font-semibold';
+        const border  = isLast ? '' : 'border-b';
+        return `<tr class="${border}" style="border-color:#0f172a">
+          <td class="px-5 py-3.5 font-mono ${boldRow}">${s.hold}d</td>
+          <td class="text-right px-5 py-3.5 ${isLast ? 'font-semibold' : ''}" style="color:#94a3b8">${s.trades.toLocaleString()}</td>
+          <td class="text-right px-5 py-3.5 ${isLast ? 'font-semibold' : ''}">+${s.avg_ret}%</td>
+          <td class="text-right px-5 py-3.5" style="color:#64748b">+${s.spy}%</td>
+          <td class="text-right px-5 py-3.5 ${exBold}" style="color:#f59e0b">+${s.excess}%</td>
+          <td class="text-right px-5 py-3.5" style="color:#cbd5e1">${s.win_pct}%</td>
+        </tr>`;
+      }).join('');
+    })();
+
+    // ── High-conviction politicians chart ──────────────────────────────────
+    (function() {
+      if (typeof HC_POLITICIANS === 'undefined' || !HC_POLITICIANS.length) return;
+      const sorted = [...HC_POLITICIANS].sort((a, b) => b.excess - a.excess);
+      new Chart(document.getElementById('hcPoliticiansChart'), {
+        type: 'bar',
+        data: {
+          labels: sorted.map(p => p.name),
+          datasets: [{
+            label: 'Avg Excess Return (90d, >$15k trades)',
+            data: sorted.map(p => p.excess),
+            backgroundColor: sorted.map(p =>
+              p.trades >= 50 ? '#f59e0b' : p.trades >= 25 ? '#fbbf24' : '#fcd34d'
+            ),
+            borderRadius: 4,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => [
+                  ` Excess: +${sorted[ctx.dataIndex].excess}%`,
+                  ` Trades: ${sorted[ctx.dataIndex].trades}`
+                ]
+              }
+            }
+          },
+          scales: {
+            x: { grid: { color: '#1e293b' }, border: { color: '#334155' }, ticks: { font: { size: 11 } } },
+            y: { grid: { color: '#1e293b' }, border: { color: '#334155' }, ticks: { callback: v => `+${v}%` } }
+          }
+        }
+      });
+    })();
+
+    // ── Strategy 2 table ──────────────────────────────────────────────────
+    (function() {
+      if (typeof STRATEGY2 === 'undefined' || !STRATEGY2.length) return;
+      const maxExcess = Math.max(...STRATEGY2.map(r => r.excess));
+      const tbody = document.getElementById('strategy2Body');
+      tbody.innerHTML = STRATEGY2.map((r, i) => {
+        const isBest   = r.excess === maxExcess;
+        const isLast   = i === STRATEGY2.length - 1;
+        const boldRow  = isBest  ? 'font-bold text-white' : 'font-medium';
+        const exBold   = isBest  ? 'font-bold text-base'  : 'font-semibold';
+        const border   = isLast  ? '' : 'border-b';
+        const bestMark = isBest  ? ' ◀' : '';
+        return `<tr class="${border}" style="border-color:#0f172a${isBest ? ';background:#f59e0b08' : ''}">
+          <td class="px-5 py-3.5 font-mono ${boldRow}">+${r.hold_after_sell}d${bestMark}</td>
+          <td class="text-right px-5 py-3.5" style="color:#94a3b8">${r.pairs}</td>
+          <td class="text-right px-5 py-3.5 ${isBest ? 'font-semibold' : ''}">+${r.avg_ret}%</td>
+          <td class="text-right px-5 py-3.5" style="color:#64748b">+${r.spy}%</td>
+          <td class="text-right px-5 py-3.5 ${exBold}" style="color:#f59e0b">+${r.excess}%</td>
+          <td class="text-right px-5 py-3.5" style="color:#cbd5e1">${r.win_pct}%</td>
+        </tr>`;
+      }).join('');
+    })();
+
+    // ── Strategy 2 chart ──────────────────────────────────────────────────
+    (function() {
+      if (typeof STRATEGY2 === 'undefined' || !STRATEGY2.length) return;
+      new Chart(document.getElementById('strategy2Chart'), {
+        type: 'bar',
+        data: {
+          labels: STRATEGY2.map(r => '+' + r.hold_after_sell + 'd'),
+          datasets: [
+            {
+              label: 'Congress (Strategy 2)',
+              data: STRATEGY2.map(r => r.avg_ret),
+              backgroundColor: '#f59e0b',
+              borderRadius: 4,
+              borderSkipped: false,
+            },
+            {
+              label: 'SPY (same window)',
+              data: STRATEGY2.map(r => r.spy),
+              backgroundColor: '#334155',
+              borderRadius: 4,
+              borderSkipped: false,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` ${ctx.dataset.label}: +${ctx.raw}%`,
+                afterBody: (items) => {
+                  const i = items[0].dataIndex;
+                  return `  Excess: +${STRATEGY2[i].excess}%`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { color: '#1e293b' }, border: { color: '#334155' } },
+            y: {
+              grid: { color: '#1e293b' },
+              border: { color: '#334155' },
+              ticks: { callback: v => `+${v}%` }
+            }
+          }
+        }
+      });
+    })();
 
     // ── Options hold period chart ──────────────────────────────────────────
     new Chart(document.getElementById('optionsChart'), {
