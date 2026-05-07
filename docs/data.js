@@ -3,7 +3,7 @@
 const DATA_GENERATED = "2026-05-06";
 
 const STATS = {
-  "total_trades": 11197,
+  "total_trades": 11201,
   "total_options": 462,
   "reliable_count": 12,
   "avg_excess_90d": 4.8

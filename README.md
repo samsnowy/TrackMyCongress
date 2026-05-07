@@ -91,7 +91,7 @@ Two signal types, one execution path. State persisted in `strategy_state.json`. 
 
 **Sizing:** 5% of equity per position, max 15 simultaneous positions.
 
-Multiple politicians buying the same ticker within the lookback window are deduplicated into one `[ACCUMULATION]` signal. Rankings refreshed daily via `run_daily.bat` → `python main.py highconv`.
+Multiple politicians buying the same ticker within the lookback window are deduplicated into one `[ACCUMULATION]` signal. Rankings refreshed periodically via `python main.py highconv`.
 
 ---
 

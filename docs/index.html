@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,61 +9,48 @@
   <script src="data.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #0f172a;
-      color: #f1f5f9;
-    }
-
-    .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-    }
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f1f5f9; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; }
+    .filing-filter { background: #1e293b; border-color: #334155; color: #94a3b8; }
+    .filing-filter:hover { border-color: #475569; color: #f1f5f9; }
+    .active-filter { background: #10b98120 !important; border-color: #34d399 !important; color: #34d399 !important; }
   </style>
 </head>
-
 <body>
 
   <!-- Nav -->
-  <nav
-    class="border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 bg-slate-950/90 backdrop-blur z-10"
+  <nav class="border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-10"
     style="background:#0f172aee">
     <div class="flex items-center gap-2">
-      <span class="text-emerald-400 font-black text-lg">◆</span>
+      <span class="text-emerald-400 font-black text-lg">&#9670;</span>
       <span class="font-bold text-lg tracking-tight">TrackMyCongress</span>
     </div>
     <a href="https://github.com/samsnowy/TrackMyCongress" target="_blank"
       class="flex items-center gap-2 text-slate-400 hover:text-white text-sm transition-colors">
-      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-        <path
-          d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-      </svg>
-      View on GitHub
+      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+      GitHub
     </a>
   </nav>
 
   <!-- Hero -->
-  <section class="px-6 py-24 max-w-6xl mx-auto">
-    <div class="inline-flex items-center gap-2 border rounded-full px-4 py-1.5 text-sm font-medium mb-8"
+  <section class="px-6 py-16 max-w-6xl mx-auto">
+    <div class="inline-flex items-center gap-2 border rounded-full px-4 py-1.5 text-sm font-medium mb-6"
       style="background:#10b98115;border-color:#10b98133;color:#34d399">
-      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" style="background:#34d399"></span>
-      Live paper trading on Alpaca — $1M simulated equity
+      <span class="w-2 h-2 rounded-full animate-pulse" style="background:#34d399"></span>
+      Live paper trading on Alpaca &mdash; $1M simulated equity
     </div>
-    <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-none">
-      Following the<br />
-      <span style="color:#34d399">Money in Congress</span>
+    <h1 class="text-5xl md:text-7xl font-black tracking-tight mb-5 leading-none">
+      Following the<br /><span style="color:#34d399">Money in Congress</span>
     </h1>
-    <p class="text-xl max-w-2xl mb-12 leading-relaxed" style="color:#94a3b8">
-      STOCK Act filings are public — members of Congress must disclose trades within 45 days.
+    <p class="text-xl max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
+      STOCK Act filings are public &mdash; members of Congress must disclose trades within 45 days.
       We backtested <strong style="color:#f1f5f9">10,000+ trades</strong> from 170 members against SPY.
-      Following the reliable group beats SPY by
-      <strong style="color:#34d399" id="hero-avg-excess">+4.8%</strong> at 90 days —
-      and filtering to high-conviction trades (&gt;$15k) from just 4 politicians pushes that to
-      <strong style="color:#f59e0b" id="hero-hc-excess">+7.9%</strong>.
+      Following the 12-politician reliable group beats SPY by
+      <strong style="color:#34d399" id="hero-avg-excess">+4.8%</strong> at 90 days.
+      A high-conviction filter showed <strong style="color:#f59e0b" id="hero-hc-excess">+7.9%</strong>
+      &mdash; but an audit found structural issues; the live strategy runs the broader group.
     </p>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="card p-5">
@@ -77,359 +63,179 @@
       </div>
       <div class="card p-5">
         <div class="text-3xl font-bold" id="stat-avg-excess" style="color:#34d399">+4.8%</div>
-        <div class="text-sm mt-1" style="color:#94a3b8">90d excess — 12-pol all-trades</div>
+        <div class="text-sm mt-1" style="color:#94a3b8">90d excess &mdash; 12-pol group (live)</div>
       </div>
       <div class="card p-5">
         <div class="text-3xl font-bold" id="stat-hc-excess" style="color:#f59e0b">+7.9%</div>
-        <div class="text-sm mt-1" style="color:#94a3b8">90d excess — HC strategy (live)</div>
+        <div class="text-sm mt-1" style="color:#94a3b8">90d excess &mdash; HC backtest (research)</div>
       </div>
     </div>
   </section>
 
-  <!-- Finding 1: Alpha grows with hold period -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
+  <!-- Finding 1+2: Alpha signal -->
+  <section class="px-6 py-12 border-t" style="border-color:#1e293b">
     <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#34d399">Finding 1</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-4">Alpha grows with hold period</h2>
-      <p class="max-w-2xl mb-12 leading-relaxed" style="color:#94a3b8">
-        Entry is the close on the day a purchase is <em>publicly filed</em> (30–45 days after the actual
-        transaction). Excess return over SPY grows consistently — consistent with an informational edge
-        that plays out over months, not days.
+      <div class="text-xs font-semibold tracking-widest uppercase mb-2" style="color:#34d399">Findings 1 &amp; 2</div>
+      <h2 class="text-3xl md:text-4xl font-bold mb-3">Alpha grows with hold period</h2>
+      <p class="max-w-2xl mb-8 leading-relaxed" style="color:#94a3b8">
+        Entry at close on the public filing date (30&ndash;45 days after the actual trade).
+        <span id="subtitle-reliable-count">12</span> politicians with avg excess &gt;2% and &ge;20 trades. Edge is in magnitude &mdash; winners win bigger than losers lose.
       </p>
-
-      <div class="grid md:grid-cols-2 gap-8 items-start">
-        <!-- Table -->
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
         <div class="card overflow-hidden">
           <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b text-xs font-medium uppercase tracking-wide"
-                style="border-color:#334155;color:#64748b">
-                <th class="text-left px-5 py-3">Hold</th>
-                <th class="text-right px-5 py-3">Trades</th>
-                <th class="text-right px-5 py-3">Avg Ret</th>
-                <th class="text-right px-5 py-3">SPY</th>
-                <th class="text-right px-5 py-3">Excess</th>
-                <th class="text-right px-5 py-3">Win%</th>
-              </tr>
-            </thead>
+            <thead><tr class="border-b text-xs font-medium uppercase tracking-wide" style="border-color:#334155;color:#64748b">
+              <th class="text-left px-5 py-3">Hold</th>
+              <th class="text-right px-5 py-3">Trades</th>
+              <th class="text-right px-5 py-3">Avg Ret</th>
+              <th class="text-right px-5 py-3">SPY</th>
+              <th class="text-right px-5 py-3">Excess</th>
+              <th class="text-right px-5 py-3">Win%</th>
+            </tr></thead>
             <tbody id="sensitivityBody"></tbody>
           </table>
           <div class="px-5 py-3 border-t text-xs" style="border-color:#334155;color:#64748b">
-            Reliable group only (<span id="caption-reliable-count">12</span> politicians, avg excess &gt;2% + ≥20 trades). Dataset: House + Senate, 2022–2026.
+            Reliable group: <span id="caption-reliable-count">12</span> politicians, excess &gt;2%, &ge;20 trades. 2022&ndash;2026.
           </div>
         </div>
-
-        <!-- Chart -->
         <div class="card p-5">
-          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#64748b">Avg return vs SPY by
-            hold period</h3>
+          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#64748b">Avg return vs SPY by hold period</h3>
           <canvas id="holdChart"></canvas>
         </div>
       </div>
-
-      <div class="mt-6 card p-5" style="border-left:4px solid #34d399">
+      <div class="card p-5 mb-6" style="border-left:4px solid #34d399">
         <p class="text-sm leading-relaxed" style="color:#cbd5e1">
-          <strong class="text-white">Win rate hovers ~50–53% regardless of hold period.</strong>
-          The edge is not in picking direction — it's in the asymmetric return distribution. Winners win
-          bigger than losers lose. Best single trade: IREN held by Cleo Fields (+256.7% excess).
+          <strong class="text-white">Win rate hovers ~50&ndash;55% regardless of hold period.</strong>
+          The edge is not in picking direction &mdash; it&rsquo;s in the asymmetric return distribution. Winners win bigger than losers lose. Best single trade: IREN held by Cleo Fields (+256.7% excess).
         </p>
       </div>
-    </div>
-  </section>
-
-  <!-- Finding 2: Top Performers -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
-    <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#34d399">Finding 2</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-4">Top performers at 90-day hold</h2>
-      <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
-        <span id="subtitle-reliable-count">12</span> politicians with avg excess return &gt;2% and ≥20 trades in the 2022–2026 dataset.
-        Darker bars = more trades = more statistically meaningful.
+      <div class="text-xs font-semibold tracking-widest uppercase mb-3 mt-2" style="color:#34d399">Finding 2</div>
+      <h3 class="text-2xl font-bold mb-3">Top performers at 90-day hold</h3>
+      <p class="max-w-2xl mb-6" style="color:#94a3b8">
+        <span class="reliable-count">12</span> politicians with avg excess &gt;2% and &ge;20 trades. Darker bars = more trades = more statistically meaningful.
       </p>
       <div class="card p-6">
         <canvas id="politiciansChart" style="max-height:340px"></canvas>
       </div>
       <div class="mt-3 text-xs text-center" style="color:#64748b">
-        Strongest by count: Cleo Fields (81 trades, +6.3%) and Tuberville (285 trades, +2.1%).
-        Sullivan (+14.8%) and Moore (+12.9%) lead by excess return.
-        Gottheimer (362 trades, +1.7%) and Mark Green (+13.8%, only 9 trades) excluded by the tightened filter — below the excess &gt;2% / ≥20 trade floor.
+        Sullivan (+14.8%) and Moore (+12.9%) lead by excess return. Tuberville (285 trades, +2.1%) has the largest sample. Darker bars = more trades.
       </div>
     </div>
   </section>
 
   <!-- Finding 3: Options -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
+  <section class="px-6 py-12 border-t" style="border-color:#1e293b">
     <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#34d399">Finding 3</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-4">Pelosi and Gottheimer buy synthetic longs</h2>
-      <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
-        462 options trades across both chambers. Senate is "put-heavy" — but that's entirely
-        Tommy Tuberville running volatility straddles, not directional bets. The real options signal
-        is in House calls.
+      <div class="text-xs font-semibold tracking-widest uppercase mb-2" style="color:#34d399">Finding 3</div>
+      <h2 class="text-3xl md:text-4xl font-bold mb-3">Pelosi and Gottheimer buy synthetic longs</h2>
+      <p class="max-w-2xl mb-8 leading-relaxed" style="color:#94a3b8">
+        462 options trades across both chambers. Senate is &ldquo;put-heavy&rdquo; &mdash; entirely Tuberville running volatility straddles. The real signal is in deep-ITM House calls.
       </p>
-
-      <div class="grid md:grid-cols-3 gap-6 mb-10">
-        <div class="card p-6">
-          <div class="text-4xl font-bold mb-2" style="color:#34d399">76%</div>
-          <div class="font-medium mb-2">of House calls are deeply ITM</div>
-          <div class="text-sm" style="color:#94a3b8">
-            29 of 38 audited call purchases have strike/spot &lt; 0.80.
-            Gottheimer and Pelosi are buying leveraged stock positions, not making speculative bets.
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="card p-4 text-center">
+              <div class="text-3xl font-bold mb-1" style="color:#34d399">76%</div>
+              <div class="text-xs" style="color:#94a3b8">of House calls are &gt;20% ITM &mdash; leveraged stock positions, not speculative</div>
+            </div>
+            <div class="card p-4 text-center">
+              <div class="text-3xl font-bold mb-1" style="color:#34d399">+3.8%</div>
+              <div class="text-xs" style="color:#94a3b8">Excess at 30d buying the underlying on call filing date</div>
+            </div>
+            <div class="card p-4 text-center">
+              <div class="text-3xl font-bold mb-1" style="color:#cbd5e1">~20</div>
+              <div class="text-xs" style="color:#94a3b8">Tuberville straddle pairs &mdash; avg 20.3% absolute move to expiry</div>
+            </div>
+          </div>
+          <div class="card overflow-hidden text-sm">
+            <div class="px-5 py-3 border-b font-semibold" style="border-color:#334155">Deep ITM examples &mdash; strike/spot at filing</div>
+            <table class="w-full">
+              <thead><tr class="border-b text-xs uppercase tracking-wide" style="border-color:#334155;color:#64748b">
+                <th class="text-left px-5 py-2">Who</th><th class="text-left px-5 py-2">Ticker</th>
+                <th class="text-right px-5 py-2">Strike</th><th class="text-right px-5 py-2">Spot</th><th class="text-right px-5 py-2">Ratio</th>
+              </tr></thead>
+              <tbody>
+                <tr class="border-b" style="border-color:#0f172a">
+                  <td class="px-5 py-3" style="color:#cbd5e1">Pelosi</td><td class="px-5 py-3 font-mono font-bold">NVDA</td>
+                  <td class="text-right px-5 py-3">$80</td><td class="text-right px-5 py-3" style="color:#64748b">$137.70</td>
+                  <td class="text-right px-5 py-3"><span class="text-xs font-mono font-bold px-2 py-0.5 rounded" style="background:#10b98120;color:#34d399">0.58</span></td>
+                </tr>
+                <tr class="border-b" style="border-color:#0f172a">
+                  <td class="px-5 py-3" style="color:#cbd5e1">Pelosi</td><td class="px-5 py-3 font-mono font-bold">AMZN</td>
+                  <td class="text-right px-5 py-3">$150</td><td class="text-right px-5 py-3" style="color:#64748b">$225.90</td>
+                  <td class="text-right px-5 py-3"><span class="text-xs font-mono font-bold px-2 py-0.5 rounded" style="background:#10b98120;color:#34d399">0.66</span></td>
+                </tr>
+                <tr>
+                  <td class="px-5 py-3" style="color:#cbd5e1">Gottheimer</td><td class="px-5 py-3 font-mono font-bold">MSFT</td>
+                  <td class="text-right px-5 py-3">$320&ndash;325</td><td class="text-right px-5 py-3" style="color:#64748b">$424.62</td>
+                  <td class="text-right px-5 py-3"><span class="text-xs font-mono font-bold px-2 py-0.5 rounded" style="background:#10b98120;color:#34d399">0.75&ndash;0.77</span></td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
-        <div class="card p-6">
-          <div class="text-4xl font-bold mb-2" style="color:#34d399">+3.8%</div>
-          <div class="font-medium mb-2">Excess return at 30 days</div>
-          <div class="text-sm" style="color:#94a3b8">
-            Buying the underlying stock on call filing date outperforms SPY by +3.8% at 30d.
-            Signal peaks early and fades by 90d — opposite of the stock signal.
-          </div>
-        </div>
-        <div class="card p-6">
-          <div class="text-4xl font-bold mb-2" style="color:#cbd5e1">~20</div>
-          <div class="font-medium mb-2">Tuberville straddle pairs</div>
-          <div class="text-sm" style="color:#94a3b8">
-            Avg absolute move to expiry: 20.3%. 75% moved &gt;10%, 50% moved &gt;20%.
-            A pure volatility strategy on the same underlying Senate committees he sits on.
-          </div>
-        </div>
-      </div>
-
-      <div class="grid md:grid-cols-2 gap-8 items-start">
-        <!-- Deep ITM table -->
-        <div class="card overflow-hidden">
-          <div class="px-6 py-4 border-b" style="border-color:#334155">
-            <h3 class="font-semibold">Deep ITM examples</h3>
-            <p class="text-sm mt-0.5" style="color:#94a3b8">Strike / spot at filing date. Live signal threshold: &lt;
-              0.85.</p>
-          </div>
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b text-xs font-medium uppercase tracking-wide"
-                style="border-color:#334155;color:#64748b">
-                <th class="text-left px-5 py-3">Who</th>
-                <th class="text-left px-5 py-3">Ticker</th>
-                <th class="text-right px-5 py-3">Strike</th>
-                <th class="text-right px-5 py-3">Spot</th>
-                <th class="text-right px-5 py-3">Ratio</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="border-b" style="border-color:#0f172a">
-                <td class="px-5 py-3.5" style="color:#cbd5e1">Pelosi</td>
-                <td class="px-5 py-3.5 font-mono font-bold">NVDA</td>
-                <td class="text-right px-5 py-3.5">$80</td>
-                <td class="text-right px-5 py-3.5" style="color:#64748b">$137.70</td>
-                <td class="text-right px-5 py-3.5">
-                  <span class="text-xs font-mono font-bold px-2 py-0.5 rounded"
-                    style="background:#10b98120;color:#34d399">0.58</span>
-                </td>
-              </tr>
-              <tr class="border-b" style="border-color:#0f172a">
-                <td class="px-5 py-3.5" style="color:#cbd5e1">Pelosi</td>
-                <td class="px-5 py-3.5 font-mono font-bold">AMZN</td>
-                <td class="text-right px-5 py-3.5">$150</td>
-                <td class="text-right px-5 py-3.5" style="color:#64748b">$225.90</td>
-                <td class="text-right px-5 py-3.5">
-                  <span class="text-xs font-mono font-bold px-2 py-0.5 rounded"
-                    style="background:#10b98120;color:#34d399">0.66</span>
-                </td>
-              </tr>
-              <tr class="border-b" style="border-color:#0f172a">
-                <td class="px-5 py-3.5" style="color:#cbd5e1">Gottheimer</td>
-                <td class="px-5 py-3.5 font-mono font-bold">MSFT</td>
-                <td class="text-right px-5 py-3.5">$320–325</td>
-                <td class="text-right px-5 py-3.5" style="color:#64748b">$424.62</td>
-                <td class="text-right px-5 py-3.5">
-                  <span class="text-xs font-mono font-bold px-2 py-0.5 rounded"
-                    style="background:#10b98120;color:#34d399">0.75–0.77</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Options hold period chart -->
-        <div class="card p-5">
-          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#64748b">Options signal excess
-            return by hold period</h3>
+        <div class="card p-4">
+          <h3 class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:#64748b">Options vs stock signal excess by hold period</h3>
           <canvas id="optionsChart"></canvas>
-          <p class="text-xs mt-4" style="color:#64748b">
-            Buying the underlying stock on House call filing date. Signal peaks at 30d and fades — unlike the stock
-            signal which peaks at 90d.
-          </p>
+          <p class="text-xs mt-3" style="color:#64748b">Options signal peaks at 30d then collapses. Stock signal builds over 90d. Live strategy uses 30d hold for options, 90d for stocks.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Finding 4: Sell-Lag -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
+  <section class="px-6 py-12 border-t" style="border-color:#1e293b">
     <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#f59e0b">Finding 4 —
-        Counterintuitive</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-4">Exit 10 days after the sell filing, not before</h2>
-      <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
-        Politicians sell 27 days before filing on average. The hypothesis: price drops during this
-        undisclosed window, so you should exit when you see the sell filing.
-        The data says the opposite — but only hold for about 10 days after.
+      <div class="text-xs font-semibold tracking-widest uppercase mb-2" style="color:#f59e0b">Finding 4 &mdash; Counterintuitive</div>
+      <h2 class="text-3xl md:text-4xl font-bold mb-3">Exit 10 days after the sell filing, not before</h2>
+      <p class="max-w-2xl mb-8 leading-relaxed" style="color:#94a3b8">
+        Politicians sell 27 days before filing on average. Price actually rises +1.7% during this undisclosed window &mdash; don&rsquo;t exit on the sell filing. But stop at +10 days after.
       </p>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="card p-6 text-center">
-          <div class="text-xs uppercase tracking-wide mb-2" style="color:#64748b">Pairs analyzed</div>
-          <div class="text-3xl font-bold">1,425</div>
-          <div class="text-sm mt-1" style="color:#64748b">164 politicians, 598 tickers</div>
-        </div>
-        <div class="card p-6 text-center">
-          <div class="text-xs uppercase tracking-wide mb-2" style="color:#64748b">Median hold before sell</div>
-          <div class="text-3xl font-bold">128d</div>
-          <div class="text-sm mt-1" style="color:#64748b">~4 months actual hold</div>
-        </div>
-        <div class="card p-6 text-center">
-          <div class="text-xs uppercase tracking-wide mb-2" style="color:#64748b">Price drift during sell lag</div>
-          <div class="text-3xl font-bold" style="color:#34d399">+1.7%</div>
-          <div class="text-sm mt-1" style="color:#64748b">Price rises while they delay filing</div>
-        </div>
-        <div class="card p-6 text-center">
-          <div class="text-xs uppercase tracking-wide mb-2" style="color:#64748b">Excess at sell filing +10d</div>
-          <div class="text-3xl font-bold" style="color:#34d399">+4.0%</div>
-          <div class="text-sm mt-1" style="color:#64748b">vs SPY — sweet spot exit</div>
-        </div>
-      </div>
-
-      <div class="card p-5 mb-8" style="border-left:4px solid #f59e0b">
-        <p class="text-sm leading-relaxed" style="color:#cbd5e1">
-          <strong class="text-white">Nuanced result.</strong>
-          Don't exit when you see the sell filing — price still drifts up +1.7% during the undisclosed sell window.
-          But don't hold indefinitely either. Strategy 2 backtested exit points from 0 to 90 days past the sell filing:
-          <strong style="color:#f1f5f9">the sweet spot is +10 days</strong> (+4.0% excess vs SPY, 49% win rate).
-          Beyond that, excess return stops growing — the informational edge fades once the sell is public knowledge.
-          One exception: pairs with &gt;60-day disclosure lag show +15.9% avg move — late filers held through outsized moves.
-        </p>
-      </div>
-
-      <!-- Strategy 2 data table + chart -->
-      <div class="grid md:grid-cols-2 gap-8 items-start">
-        <!-- Table -->
+      <div class="grid md:grid-cols-2 gap-6">
         <div class="card overflow-hidden">
-          <div class="px-5 py-4 border-b" style="border-color:#334155">
-            <h3 class="font-semibold">Exit timing sensitivity</h3>
-            <p class="text-sm mt-0.5" style="color:#94a3b8">Buy on purchase filing, exit on sell filing + N days. 12 reliable politicians.</p>
+          <div class="px-5 py-3 border-b" style="border-color:#334155">
+            <div class="font-semibold">Exit timing sensitivity</div>
+            <div class="text-xs mt-0.5" style="color:#94a3b8">Buy on purchase filing, exit on sell filing + N days. 12 reliable politicians.</div>
           </div>
           <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b text-xs font-medium uppercase tracking-wide"
-                style="border-color:#334155;color:#64748b">
-                <th class="text-left px-5 py-3">Exit</th>
-                <th class="text-right px-5 py-3">Pairs</th>
-                <th class="text-right px-5 py-3">Avg Ret</th>
-                <th class="text-right px-5 py-3">SPY</th>
-                <th class="text-right px-5 py-3">Excess</th>
-                <th class="text-right px-5 py-3">Win%</th>
-              </tr>
-            </thead>
+            <thead><tr class="border-b text-xs uppercase tracking-wide" style="border-color:#334155;color:#64748b">
+              <th class="text-left px-5 py-2">Exit</th><th class="text-right px-5 py-2">Pairs</th>
+              <th class="text-right px-5 py-2">Avg Ret</th><th class="text-right px-5 py-2">SPY</th>
+              <th class="text-right px-5 py-2">Excess</th><th class="text-right px-5 py-2">Win%</th>
+            </tr></thead>
             <tbody id="strategy2Body"></tbody>
           </table>
-          <div class="px-5 py-3 border-t text-xs" style="border-color:#334155;color:#64748b">
-            Strategy 1 benchmark (fixed 90d hold): +2.4% excess, 51% win rate.
+          <div class="px-5 py-2 border-t text-xs" style="border-color:#334155;color:#64748b">
+            Strategy 1 benchmark (fixed 90d hold): +4.8% excess, 55% win rate.
           </div>
         </div>
-
-        <!-- Chart -->
-        <div class="card p-5">
-          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#64748b">Excess return vs SPY by exit timing</h3>
+        <div class="card p-4">
+          <h3 class="text-xs font-semibold uppercase tracking-widest mb-3" style="color:#64748b">Excess return vs SPY by exit timing</h3>
           <canvas id="strategy2Chart"></canvas>
-          <p class="text-xs mt-4" style="color:#64748b">
-            Buy on purchase filing date, exit N days after the sell filing. Peak excess at +10d — edge fades quickly once the sell is public.
-          </p>
+          <p class="text-xs mt-3" style="color:#64748b">Peak excess at +10d after sell filing. Edge fades quickly once the sell is public knowledge.</p>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Finding 5: High-Conviction Strategy -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
-    <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#f59e0b">Finding 5 — Concentrated</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-4">Follow the big trades — 4 politicians, ~5 signals/month</h2>
-      <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
-        78% of purchase filings are in the minimum-disclosure bracket ($1k–$15k). Filtering to trades over $15k
-        leaves 4 politicians with stronger, cleaner signal — and a natural portfolio size of ~15 open positions
-        at any time (5 signals/month × 90-day hold).
-      </p>
-
-      <div class="grid md:grid-cols-2 gap-8 items-start mb-8">
-        <!-- Sensitivity table -->
-        <div class="card overflow-hidden">
-          <div class="px-5 py-4 border-b" style="border-color:#334155">
-            <h3 class="font-semibold">Hold period sensitivity — high-conviction only</h3>
-            <p class="text-sm mt-0.5" style="color:#94a3b8">Purchases &gt;$15k, 4 reliable politicians (≥20 trades, excess &gt;2%).</p>
-          </div>
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="border-b text-xs font-medium uppercase tracking-wide" style="border-color:#334155;color:#64748b">
-                <th class="text-left px-5 py-3">Hold</th>
-                <th class="text-right px-5 py-3">Trades</th>
-                <th class="text-right px-5 py-3">Avg Ret</th>
-                <th class="text-right px-5 py-3">SPY</th>
-                <th class="text-right px-5 py-3">Excess</th>
-                <th class="text-right px-5 py-3">Win%</th>
-              </tr>
-            </thead>
-            <tbody id="hcSensitivityBody"></tbody>
-          </table>
-          <div class="px-5 py-3 border-t text-xs" style="border-color:#334155;color:#64748b">
-            Compare: 12-politician all-trades strategy gives +2.4% excess at 90d (51% win). High-conviction gives +7.9% (64% win).
-          </div>
-        </div>
-
-        <!-- Politicians chart -->
-        <div class="card p-5">
-          <h3 class="text-xs font-semibold uppercase tracking-widest mb-4" style="color:#64748b">High-conviction reliable group — avg excess at 90d</h3>
-          <canvas id="hcPoliticiansChart" style="max-height:260px"></canvas>
-          <p class="text-xs mt-4" style="color:#64748b">
-            Virginia Foxx qualifies historically but has filed zero high-conviction trades in the past 12 months.
-            Active signal sources: Tim Moore, Cleo Fields, David McCormick.
-          </p>
-        </div>
-      </div>
-
-      <div class="card p-5" style="border-left:4px solid #f59e0b">
-        <p class="text-sm leading-relaxed" style="color:#cbd5e1">
-          <strong class="text-white">Portfolio math.</strong>
-          At ~5 unique signals/month and a 90-day hold, this strategy runs ~15 open positions in steady state —
-          right at the recommended cap. No position-limit overflow. Each signal represents a politician putting
-          at least $15k of their own money behind the trade, not a minimum-disclosure filing.
-          The 78% of small trades are ignored entirely, which cuts noise without cutting alpha —
-          the high-conviction group's +7.9% excess at 90d is more than 3× the all-trades strategy's +2.4%.
-        </p>
       </div>
     </div>
   </section>
 
   <!-- Recent Filings -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
+  <section class="px-6 py-12 border-t" style="border-color:#1e293b">
     <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#34d399">Static Snapshot</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-2">Recent STOCK Act filings</h2>
-      <p class="max-w-2xl mb-8 leading-relaxed" style="color:#94a3b8">
-        Last 90 days of disclosures from the Quiver Quant feed.
-        Not live — data is updated manually when the scraper runs.
+      <div class="text-xs font-semibold tracking-widest uppercase mb-2" style="color:#34d399">Static Snapshot</div>
+      <h2 class="text-3xl md:text-4xl font-bold mb-1">Recent STOCK Act filings</h2>
+      <p class="max-w-2xl mb-6 leading-relaxed" style="color:#94a3b8">
+        Last 90 days from the Quiver Quant feed. Not live &mdash; updated when scraper runs.
         <span style="color:#64748b" id="snapshot-date">Snapshot: 2026-04-30.</span>
       </p>
-
-      <!-- Filter buttons -->
-      <div class="flex flex-wrap gap-2 mb-5" id="filingFilters">
+      <div class="flex flex-wrap gap-2 mb-4" id="filingFilters">
         <button onclick="filterFilings('all')"       class="filing-filter active-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="all">All</button>
-        <button onclick="filterFilings('purchase')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="purchase">Purchases only</button>
-        <button onclick="filterFilings('sale')"      class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="sale">Sales only</button>
-        <button onclick="filterFilings('options')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="options">Options only</button>
-        <button onclick="filterFilings('reliable')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="reliable">★ Reliable group</button>
-        <button onclick="filterFilings('signals')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="signals">★ Buy signals</button>
-        <button onclick="filterFilings('hcsignals')" class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="hcsignals">★ HC signals</button>
+        <button onclick="filterFilings('purchase')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="purchase">Purchases</button>
+        <button onclick="filterFilings('sale')"      class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="sale">Sales</button>
+        <button onclick="filterFilings('options')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="options">Options</button>
+        <button onclick="filterFilings('reliable')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="reliable">&#9733; Reliable group</button>
+        <button onclick="filterFilings('signals')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="signals">&#9733; Buy signals</button>
+        <button onclick="filterFilings('hcsignals')" class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="hcsignals">&#9733; HC signals</button>
       </div>
-
       <div class="card overflow-hidden">
         <div style="overflow-x:auto">
           <table class="w-full text-sm" id="filingsTable">
@@ -447,711 +253,133 @@
             <tbody id="filingsBody"></tbody>
           </table>
         </div>
-        <div class="px-4 py-3 text-xs" style="color:#475569;border-top:1px solid #1e293b">
-          ★ = in reliable backtest group (avg excess &gt;2%, ≥20 trades at 90d hold) &nbsp;·&nbsp;
-          Low conv = $1k–$15k bracket, filtered from live strategy
+        <div class="px-4 py-2 text-xs" style="color:#475569;border-top:1px solid #1e293b">
+          &#9733; = reliable backtest group (excess &gt;2%, &ge;20 trades at 90d) &nbsp;&middot;&nbsp; Low conv = $1k&ndash;$15k bracket
         </div>
       </div>
-
-      <!-- Pagination -->
-      <div class="flex items-center justify-between mt-4 text-sm" id="paginationBar">
-        <div style="color:#64748b">
-          Showing <span id="pageStart">1</span>–<span id="pageEnd">20</span>
-          of <span id="pageTotal">0</span> filings
-        </div>
+      <div class="flex items-center justify-between mt-3 text-sm" id="paginationBar">
+        <div style="color:#64748b">Showing <span id="pageStart">1</span>&ndash;<span id="pageEnd">20</span> of <span id="pageTotal">0</span></div>
         <div class="flex items-center gap-2">
-          <button id="pagePrev" onclick="changePage(-1)"
-            class="px-3 py-1.5 rounded border text-xs font-semibold transition-colors"
-            style="background:#1e293b;border-color:#334155;color:#94a3b8">
-            &larr; Prev
-          </button>
+          <button id="pagePrev" onclick="changePage(-1)" class="px-3 py-1.5 rounded border text-xs font-semibold" style="background:#1e293b;border-color:#334155;color:#94a3b8">&larr; Prev</button>
           <span id="pageLabel" style="color:#94a3b8;min-width:80px;text-align:center"></span>
-          <button id="pageNext" onclick="changePage(1)"
-            class="px-3 py-1.5 rounded border text-xs font-semibold transition-colors"
-            style="background:#1e293b;border-color:#334155;color:#94a3b8">
-            Next &rarr;
-          </button>
+          <button id="pageNext" onclick="changePage(1)"  class="px-3 py-1.5 rounded border text-xs font-semibold" style="background:#1e293b;border-color:#334155;color:#94a3b8">Next &rarr;</button>
         </div>
       </div>
     </div>
   </section>
-
-  <script>
-    // All data lives in data.js (FILINGS, SENSITIVITY, POLITICIANS, STATS, DATA_GENERATED)
-
-    const partyColor = { D: '#60a5fa', R: '#f87171', I: '#a78bfa' };
-
-    // Stats cards
-    document.getElementById('stat-total-trades').textContent =
-      '~' + Math.round(STATS.total_trades / 1000) + ',000';
-    document.getElementById('stat-total-options').textContent = STATS.total_options;
-    document.getElementById('stat-avg-excess').textContent   = '+' + STATS.avg_excess_90d + '%';
-    document.getElementById('hero-avg-excess').textContent   = '+' + STATS.avg_excess_90d + '%';
-    var hcExcess90 = HC_SENSITIVITY.length ? HC_SENSITIVITY[HC_SENSITIVITY.length - 1].excess : 7.9;
-    document.getElementById('stat-hc-excess').textContent  = '+' + hcExcess90 + '%';
-    document.getElementById('hero-hc-excess').textContent  = '+' + hcExcess90 + '%';
-    document.getElementById('snapshot-date').textContent = 'Snapshot: ' + DATA_GENERATED + '.';
-    ['caption-reliable-count','subtitle-reliable-count'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = STATS.reliable_count;
-    });
-
-    // Sensitivity table
-    (function() {
-      const tbody = document.getElementById('sensitivityBody');
-      tbody.innerHTML = SENSITIVITY.map((s, i) => {
-        const isLast   = i === SENSITIVITY.length - 1;
-        const boldRow  = isLast ? 'font-bold text-white' : 'font-medium';
-        const exBold   = isLast ? 'font-bold text-base' : 'font-semibold';
-        const border   = isLast ? '' : 'border-b';
-        return `<tr class="${border}" style="border-color:#0f172a">
-          <td class="px-5 py-3.5 font-mono ${boldRow}">${s.hold}d</td>
-          <td class="text-right px-5 py-3.5 ${isLast ? 'font-semibold' : ''}" style="color:#94a3b8">${s.trades.toLocaleString()}</td>
-          <td class="text-right px-5 py-3.5 ${isLast ? 'font-semibold' : ''}">+${s.avg_ret}%</td>
-          <td class="text-right px-5 py-3.5" style="color:#64748b">+${s.spy}%</td>
-          <td class="text-right px-5 py-3.5 ${exBold}" style="color:#34d399">+${s.excess}%</td>
-          <td class="text-right px-5 py-3.5" style="color:#cbd5e1">${s.win_pct}%</td>
-        </tr>`;
-      }).join('');
-    })();
-
-    function esc(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    const PAGE_SIZE = 20;
-    let _currentRows = FILINGS;
-    let _currentPage = 0;
-
-    function renderFilings(rows) {
-      _currentRows = rows;
-      _currentPage = 0;
-      renderPage();
-    }
-
-    function renderPage() {
-      const start  = _currentPage * PAGE_SIZE;
-      const end    = Math.min(start + PAGE_SIZE, _currentRows.length);
-      const page   = _currentRows.slice(start, end);
-      const tbody  = document.getElementById('filingsBody');
-
-      tbody.innerHTML = page.map((r, i) => {
-        const isBuy     = r.txn === 'Purchase';
-        const isOpt     = r.type === 'OP';
-        const rowBg     = i % 2 === 0 ? '' : 'style="background:#0f172a40"';
-        const dimStyle  = r.low_conv ? 'opacity:0.45' : '';
-
-        const txnBadge  = isBuy
-          ? '<span style="background:#10b98120;color:#34d399;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600">BUY</span>'
-          : '<span style="background:#ef444420;color:#f87171;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600">SELL</span>';
-
-        const optBadge  = isOpt
-          ? ' <span style="background:#818cf820;color:#818cf8;padding:1px 6px;border-radius:9999px;font-size:10px;font-weight:600">OPT</span>'
-          : '';
-
-        const reliableBadge = r.reliable
-          ? '<span title="In reliable backtest group" style="color:#fbbf24;font-size:13px">&#9733;</span>'
-          : '<span style="color:#334155">&#8212;</span>';
-
-        const lowConvNote = r.low_conv
-          ? '<span style="color:#475569;font-size:10px"> Low conv</span>'
-          : '';
-
-        const pDot = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${partyColor[r.party]||'#64748b'};margin-right:5px;flex-shrink:0"></span>`;
-
-        return `<tr ${rowBg} style="${dimStyle}">
-          <td class="px-4 py-2.5 font-mono text-xs" style="color:#94a3b8;white-space:nowrap">${esc(r.date)}</td>
-          <td class="px-4 py-2.5 font-mono text-xs" style="color:#64748b;white-space:nowrap">${esc(r.tx_date)}</td>
-          <td class="px-4 py-2.5" style="white-space:nowrap"><span style="display:inline-flex;align-items:center">${pDot}<span style="color:#cbd5e1">${esc(r.name)}</span></span></td>
-          <td class="px-4 py-2.5 font-mono font-bold" style="color:#f1f5f9">${esc(r.ticker)}${optBadge}</td>
-          <td class="px-4 py-2.5">${txnBadge}</td>
-          <td class="px-4 py-2.5 text-xs" style="color:#94a3b8;white-space:nowrap">${esc(r.range)}${lowConvNote}</td>
-          <td class="px-4 py-2.5 text-center">${reliableBadge}</td>
-        </tr>`;
-      }).join('');
-
-      const totalPages = Math.ceil(_currentRows.length / PAGE_SIZE);
-      document.getElementById('pageStart').textContent = _currentRows.length ? start + 1 : 0;
-      document.getElementById('pageEnd').textContent   = end;
-      document.getElementById('pageTotal').textContent = _currentRows.length;
-      document.getElementById('pageLabel').textContent = `Page ${_currentPage + 1} of ${totalPages || 1}`;
-      document.getElementById('pagePrev').disabled = _currentPage === 0;
-      document.getElementById('pageNext').disabled = _currentPage >= totalPages - 1;
-      document.getElementById('pagePrev').style.opacity = _currentPage === 0 ? '0.35' : '1';
-      document.getElementById('pageNext').style.opacity = _currentPage >= totalPages - 1 ? '0.35' : '1';
-    }
-
-    function changePage(dir) {
-      const totalPages = Math.ceil(_currentRows.length / PAGE_SIZE);
-      _currentPage = Math.max(0, Math.min(_currentPage + dir, totalPages - 1));
-      renderPage();
-      document.getElementById('filingsTable').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-
-    function filterFilings(mode) {
-      document.querySelectorAll('.filing-filter').forEach(b => b.classList.remove('active-filter'));
-      document.querySelector(`[data-filter="${mode}"]`).classList.add('active-filter');
-      let rows = FILINGS;
-      if (mode === 'purchase') rows = rows.filter(r => r.txn === 'Purchase');
-      if (mode === 'sale')     rows = rows.filter(r => r.txn === 'Sale');
-      if (mode === 'options')  rows = rows.filter(r => r.type === 'OP');
-      if (mode === 'reliable') rows = rows.filter(r => r.reliable);
-      if (mode === 'signals')  rows = rows.filter(r => r.reliable && r.txn === 'Purchase');
-      if (mode === 'hcsignals') rows = rows.filter(r => r.hc && r.txn === 'Purchase');
-      renderFilings(rows);
-    }
-
-    renderFilings(FILINGS);
-  </script>
-
-  <style>
-    .filing-filter { background: #1e293b; border-color: #334155; color: #94a3b8; }
-    .filing-filter:hover { border-color: #475569; color: #f1f5f9; }
-    .active-filter { background: #10b98120 !important; border-color: #34d399 !important; color: #34d399 !important; }
-  </style>
 
   <!-- Live Strategy -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
+  <section class="px-6 py-12 border-t" style="border-color:#1e293b">
     <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#818cf8">Live Strategy</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-4">Running on Alpaca paper trading</h2>
-      <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
-        $1,000,000 simulated equity. Two signal types, one execution path. State persisted in
-        <code class="text-xs px-1.5 py-0.5 rounded" style="background:#1e293b;color:#94a3b8">strategy_state.json</code>
-        across runs.
+      <div class="text-xs font-semibold tracking-widest uppercase mb-2" style="color:#818cf8">Live Strategy</div>
+      <h2 class="text-3xl md:text-4xl font-bold mb-3">Running on Alpaca paper trading</h2>
+      <p class="max-w-2xl mb-8 leading-relaxed" style="color:#94a3b8">
+        $1,000,000 simulated equity. Two signal types, one execution path.
       </p>
-
-      <div class="grid md:grid-cols-2 gap-6 mb-6">
-        <div class="card p-6">
-          <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-              style="background:#f59e0b20;color:#f59e0b">S</div>
-            <h3 class="font-semibold text-lg">Stock Signal — High Conviction</h3>
+      <div class="grid md:grid-cols-2 gap-6 mb-5">
+        <div class="card p-5">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style="background:#f59e0b20;color:#f59e0b">S</div>
+            <h3 class="font-semibold">Stock Signal &mdash; All Trades</h3>
           </div>
-          <div class="space-y-3 text-sm">
-            <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Source</span>
-              <span>Quiver live feed, 7-day lookback</span>
-            </div>
-            <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Filter</span>
-              <span>4 politicians — Tim Moore, Cleo Fields, David McCormick, Virginia Foxx</span>
-            </div>
-            <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Require</span>
-              <span>Trade size &gt;$15k — minimum-disclosure filings ignored</span>
-            </div>
-            <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Dedup</span>
-              <span>Multiple politicians, same ticker → one accumulation signal</span>
-            </div>
-            <div class="flex gap-3 pt-2 border-t" style="border-color:#334155">
-              <span class="w-16 shrink-0" style="color:#64748b">Hold</span>
-              <span class="font-bold text-white">90 days</span>
-            </div>
-          </div>
-          <div class="mt-4 pt-4 border-t text-xs" style="border-color:#334155;color:#64748b">
-            ~5 signals/month · ~15 open positions at steady state · +7.9% avg excess at 90d
+          <div class="space-y-2.5 text-sm">
+            <div class="flex gap-3"><span class="w-16 shrink-0" style="color:#64748b">Source</span><span>Quiver live feed, 7-day lookback</span></div>
+            <div class="flex gap-3"><span class="w-16 shrink-0" style="color:#64748b">Filter</span><span>12 reliable politicians (avg excess &gt;2%, &ge;20 trades)</span></div>
+            <div class="flex gap-3"><span class="w-16 shrink-0" style="color:#64748b">Dedup</span><span>Same ticker, multiple politicians &rarr; one accumulation signal</span></div>
+            <div class="flex gap-3 pt-2 border-t" style="border-color:#334155"><span class="w-16 shrink-0" style="color:#64748b">Hold</span><span class="font-bold text-white">90 days &nbsp;&middot;&nbsp; +4.8% avg excess</span></div>
           </div>
         </div>
-
-        <div class="card p-6">
-          <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-              style="background:#6366f120;color:#818cf8">O</div>
-            <h3 class="font-semibold text-lg">Options Signal</h3>
+        <div class="card p-5">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold" style="background:#6366f120;color:#818cf8">O</div>
+            <h3 class="font-semibold">Options Signal</h3>
           </div>
-          <div class="space-y-3 text-sm">
-            <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Source</span>
-              <span>Quiver <code class="text-xs px-1 rounded" style="background:#0f172a">TickerType==OP</code>, 30-day
-                lookback</span>
-            </div>
-            <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Filter</span>
-              <span>Gottheimer / Pelosi / Ross / Bresnahan</span>
-            </div>
-            <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Require</span>
-              <span>Call purchases, strike/spot &lt; 0.85 (≥15% ITM)</span>
-            </div>
-            <div class="flex gap-3">
-              <span class="w-16 shrink-0" style="color:#64748b">Action</span>
-              <span>Buy the underlying stock (not the option itself)</span>
-            </div>
-            <div class="flex gap-3 pt-2 border-t" style="border-color:#334155">
-              <span class="w-16 shrink-0" style="color:#64748b">Hold</span>
-              <span class="font-bold text-white">30 days</span>
-            </div>
+          <div class="space-y-2.5 text-sm">
+            <div class="flex gap-3"><span class="w-16 shrink-0" style="color:#64748b">Source</span><span>Quiver <code class="text-xs px-1 rounded" style="background:#0f172a">TickerType==OP</code>, 30-day lookback</span></div>
+            <div class="flex gap-3"><span class="w-16 shrink-0" style="color:#64748b">Filter</span><span>Gottheimer / Pelosi / Ross / Bresnahan</span></div>
+            <div class="flex gap-3"><span class="w-16 shrink-0" style="color:#64748b">Require</span><span>Call purchases, strike/spot &lt; 0.85 (&ge;15% ITM)</span></div>
+            <div class="flex gap-3 pt-2 border-t" style="border-color:#334155"><span class="w-16 shrink-0" style="color:#64748b">Hold</span><span class="font-bold text-white">30 days &nbsp;&middot;&nbsp; +3.8% avg excess</span></div>
           </div>
         </div>
       </div>
-
-      <div class="card p-5" style="background:#1e293b80">
-        <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
-          <div>
-            <span style="color:#64748b">Sizing</span>
-            <span class="font-semibold text-white ml-2">5% of equity per position</span>
-          </div>
-          <div>
-            <span style="color:#64748b">Max positions</span>
-            <span class="font-semibold text-white ml-2">15</span>
-          </div>
-
-        </div>
+      <div class="card p-4 text-sm flex flex-wrap gap-x-8 gap-y-2" style="background:#1e293b80">
+        <div><span style="color:#64748b">Sizing</span> <span class="font-semibold ml-2">5% of equity per position</span></div>
+        <div><span style="color:#64748b">Max positions</span> <span class="font-semibold ml-2">15</span></div>
+        <div><span style="color:#64748b">Action: buy underlying stock</span> <span style="color:#64748b">&nbsp;&middot;&nbsp; State in</span> <code class="text-xs ml-1" style="color:#94a3b8">strategy_state.json</code></div>
       </div>
     </div>
   </section>
 
-  <!-- Disclaimers -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
+  <!-- Caveats & Validation -->
+  <section class="px-6 py-12 border-t" style="border-color:#1e293b">
     <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#64748b">Before you trade on any of
-        this</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-10">Limitations &amp; caveats</h2>
-      <div class="grid md:grid-cols-3 gap-6">
-
-        <div class="card p-6" style="border-left:4px solid #f59e0b">
-          <h3 class="font-semibold mb-3" style="color:#fbbf24">Backtesting assumptions</h3>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            All returns assume buying at the <strong style="color:#cbd5e1">closing price on the filing date</strong>
-            with no slippage or liquidity constraints. In practice, some of these tickers are illiquid and
-            execution costs will reduce returns. The backtest also covers 2022–2026 — a strong bull market.
-            Results in different rate or volatility regimes may differ.
-          </p>
-        </div>
-
-        <div class="card p-6" style="border-left:4px solid #f59e0b">
-          <h3 class="font-semibold mb-3" style="color:#fbbf24">Data accuracy</h3>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Congressional disclosures are <strong style="color:#cbd5e1">self-reported with known errors and
-              omissions</strong>.
-            The live feed (Quiver Quant) notes their data "may be inaccurate or incomplete."
-            Options strike and expiry data is parsed from free-text description fields and can misparse.
-            The 30–45 day disclosure lag means the actual trade is already history by the time you see it.
-          </p>
-        </div>
-
-        <div class="card p-6" style="border-left:4px solid #f59e0b">
-          <h3 class="font-semibold mb-3" style="color:#fbbf24">Not financial advice</h3>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            This is a <strong style="color:#cbd5e1">research and education project</strong>.
-            Congressional disclosure patterns are one signal derived from public STOCK Act filings —
-            not a trading strategy guarantee. The <span id="caveat-reliable-count">12</span> "reliable" politicians were
-            <strong style="color:#cbd5e1">selected in-sample</strong> from the same 2022–2026 data
-            the backtest runs on (tightened from an initial screen of 37 to require avg excess &gt;2% and ≥20 trades).
-            Even with stricter criteria, in-sample selection inflates apparent returns.
-            Sample sizes per politician are small; high excess returns may
-            reflect a specific period or sector rather than persistent edge.
-            Do your own analysis before making any investment decisions.
-          </p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Validation TODOs -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
-    <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#60a5fa">What's next</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-4">Validation TODOs</h2>
-      <p class="max-w-2xl mb-10 leading-relaxed" style="color:#94a3b8">
-        The backtest signal is intriguing but not yet validated. These four tests are needed before the edge
-        can be considered real rather than an artefact of in-sample selection.
-      </p>
+      <div class="text-xs font-semibold tracking-widest uppercase mb-2" style="color:#64748b">Before you trade on any of this</div>
+      <h2 class="text-3xl md:text-4xl font-bold mb-8">Caveats &amp; validation</h2>
       <div class="grid md:grid-cols-2 gap-6">
 
-        <div class="card p-6" style="border-left:4px solid #60a5fa">
-          <div class="flex items-start justify-between mb-3">
+        <div class="card p-5" style="border-left:4px solid #f59e0b">
+          <h3 class="font-semibold mb-2" style="color:#fbbf24">In-sample selection bias</h3>
+          <p class="text-sm leading-relaxed" style="color:#94a3b8">
+            The <span id="caveat-reliable-count">12</span> &ldquo;reliable&rdquo; politicians were selected from the same 2022&ndash;2026 data the backtest runs on.
+            Even with a strict excess &gt;2% / &ge;20 trades filter, selection inflates apparent returns. Sample sizes are small; high excess may reflect a specific period or sector.
+          </p>
+        </div>
+
+        <div class="card p-5" style="border-left:4px solid #f59e0b">
+          <h3 class="font-semibold mb-2" style="color:#fbbf24">Backtesting assumptions</h3>
+          <p class="text-sm leading-relaxed" style="color:#94a3b8">
+            Returns assume buying at the <strong style="color:#cbd5e1">close on the filing date</strong> with zero slippage.
+            STOCK Act data is self-reported with known errors. The 30&ndash;45 day disclosure lag means the actual trade is already history by the time you see it. Dataset covers a mostly bullish 2022&ndash;2026.
+          </p>
+        </div>
+
+        <div class="card p-5" style="border-left:4px solid #34d399">
+          <div class="flex items-start justify-between mb-2">
             <h3 class="font-semibold">Walk-forward test</h3>
-            <span class="text-xs px-2 py-0.5 rounded font-semibold shrink-0 ml-3" style="background:#60a5fa20;color:#60a5fa">Not run</span>
+            <span class="text-xs px-2 py-0.5 rounded font-semibold ml-3 shrink-0" style="background:#10b98120;color:#34d399">Done</span>
           </div>
           <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Rank politicians on <strong style="color:#cbd5e1">2022–2023 data only</strong>, then run the backtest on
-            2024–2026 without touching the training split. If the same names outperform out-of-sample,
-            that's genuine signal — not a noise survivor from selecting in-sample.
+            Train on 2022&ndash;2023, test on 2024&ndash;2026. All-trades: 14% alpha retention (Sullivan/Suozzi left Congress; Mullin +0.8% OOS). HC: 66% retention.
+            Key caveat: Moore, McCormick, and Fields all joined Congress Jan 2025 &mdash; a true OOS test for them needs ~mid-2026.
           </p>
         </div>
 
-        <div class="card p-6" style="border-left:4px solid #60a5fa">
-          <div class="flex items-start justify-between mb-3">
-            <h3 class="font-semibold">Permutation test</h3>
-            <span class="text-xs px-2 py-0.5 rounded font-semibold shrink-0 ml-3" style="background:#60a5fa20;color:#60a5fa">Not run</span>
+        <div class="card p-5" style="border-left:4px solid #60a5fa">
+          <div class="flex items-start justify-between mb-2">
+            <h3 class="font-semibold">Remaining validations</h3>
+            <span class="text-xs px-2 py-0.5 rounded font-semibold ml-3 shrink-0" style="background:#60a5fa20;color:#60a5fa">Not run</span>
           </div>
           <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Randomly shuffle politician→ticker assignments and rerun the backtest <strong style="color:#cbd5e1">1,000 times</strong>
-            to build a null distribution. If the observed +2.3% excess sits in the top 5% of that
-            distribution, it's unlikely to be noise.
+            <strong style="color:#cbd5e1">Permutation test</strong> &mdash; shuffle politician&rarr;ticker assignments 1,000x; check if +4.8% is in the top 5%.<br />
+            <strong style="color:#cbd5e1">Transaction cost sensitivity</strong> &mdash; rerun at 0.25%, 0.5%, 1.0% round-trip friction.<br />
+            <strong style="color:#cbd5e1">Beta-adjusted alpha</strong> &mdash; if excess vanishes after beta adjustment, it&rsquo;s high-vol exposure, not informational edge.
           </p>
         </div>
 
-        <div class="card p-6" style="border-left:4px solid #60a5fa">
-          <div class="flex items-start justify-between mb-3">
-            <h3 class="font-semibold">Transaction cost sensitivity</h3>
-            <span class="text-xs px-2 py-0.5 rounded font-semibold shrink-0 ml-3" style="background:#60a5fa20;color:#60a5fa">Not run</span>
-          </div>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Rerun at <strong style="color:#cbd5e1">0.25%, 0.5%, and 1.0%</strong> round-trip friction.
-            The backtest assumes zero slippage and no bid-ask spread. At +2.3% average excess,
-            even modest execution costs could materially erode the edge.
-          </p>
-        </div>
-
-        <div class="card p-6" style="border-left:4px solid #60a5fa">
-          <div class="flex items-start justify-between mb-3">
-            <h3 class="font-semibold">Risk-adjusted returns</h3>
-            <span class="text-xs px-2 py-0.5 rounded font-semibold shrink-0 ml-3" style="background:#60a5fa20;color:#60a5fa">Not run</span>
-          </div>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Compute the <strong style="color:#cbd5e1">beta of the follow-congress portfolio</strong> vs SPY
-            and derive alpha. If excess returns vanish after beta adjustment, the strategy is
-            holding higher-volatility stocks — not exploiting an informational edge.
-          </p>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- How it works -->
-  <section class="px-6 py-20 border-t" style="border-color:#1e293b">
-    <div class="max-w-6xl mx-auto">
-      <div class="text-xs font-semibold tracking-widest uppercase mb-3" style="color:#64748b">Under the hood</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-10">How it works</h2>
-      <div class="grid md:grid-cols-4 gap-4">
-        <div class="card p-5">
-          <div class="text-xs font-semibold uppercase tracking-wide mb-3" style="color:#34d399">1 · Scrape</div>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Download every PTR filing PDF from <code class="text-xs" style="color:#cbd5e1">disclosures-clerk.house.gov</code>
-            and HTML filings from <code class="text-xs" style="color:#cbd5e1">efdsearch.senate.gov</code>.
-            Parse transaction tables with <strong style="color:#f1f5f9">pdfplumber</strong>. ~10,000 trades, 2022–2026.
-          </p>
-        </div>
-        <div class="card p-5">
-          <div class="text-xs font-semibold uppercase tracking-wide mb-3" style="color:#34d399">2 · Backtest</div>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Entry at close on <code class="text-xs" style="color:#cbd5e1">ReportDate</code> (the filing date, not the trade date).
-            Fetch OHLCV prices with <strong style="color:#f1f5f9">yfinance</strong>.
-            Measure excess return vs SPY over 10d / 20d / 30d / 60d / 90d hold windows.
-          </p>
-        </div>
-        <div class="card p-5">
-          <div class="text-xs font-semibold uppercase tracking-wide mb-3" style="color:#34d399">3 · Signal</div>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Live disclosures via <strong style="color:#f1f5f9">Quiver Quant API</strong> (12h cache).
-            Filter to the <span id="method-reliable-count">12</span> reliable politicians (avg excess &gt;2%, ≥20 trades). Deduplicate accumulation signals.
-            Detect deep-ITM call purchases as underlying buy signals.
-          </p>
-        </div>
-        <div class="card p-5">
-          <div class="text-xs font-semibold uppercase tracking-wide mb-3" style="color:#34d399">4 · Execute</div>
-          <p class="text-sm leading-relaxed" style="color:#94a3b8">
-            Place orders via <strong style="color:#f1f5f9">Alpaca paper trading API</strong>.
-            5% of equity per position, max 15 open. State persisted in JSON across runs.
-            Exit triggered by <code class="text-xs" style="color:#cbd5e1">planned_exit</code> date (filing date + hold days).
-          </p>
-        </div>
-      </div>
-      <div class="mt-6 text-sm text-center" style="color:#475569">
-        Python · pdfplumber · yfinance · pandas · Alpaca SDK · Quiver Quant
-        &nbsp;·&nbsp;
-        <a href="https://github.com/samsnowy/TrackMyCongress" target="_blank" style="color:#64748b;text-decoration:underline">View source on GitHub</a>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="border-t px-6 py-12" style="border-color:#1e293b">
+  <footer class="border-t px-6 py-10" style="border-color:#1e293b">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
       <div>
         <div class="font-bold text-lg mb-1">TrackMyCongress</div>
-        <div class="text-sm" style="color:#64748b">Research tool for congressional stock disclosure analysis. House
-          2022–2026 · Senate 2022–2026.</div>
-        <div class="text-xs mt-2" style="color:#475569">Not financial advice. Data from disclosures-clerk.house.gov and
-          efdsearch.senate.gov.</div>
+        <div class="text-sm" style="color:#64748b">Research tool for congressional stock disclosure analysis. House &amp; Senate 2022&ndash;2026.</div>
+        <div class="text-xs mt-1.5" style="color:#475569">
+          Not financial advice. &nbsp;&middot;&nbsp;
+          Python &middot; pdfplumber &middot; yfinance &middot; pandas &middot; Alpaca SDK &middot; Quiver Quant &nbsp;&middot;&nbsp;
+          Data from disclosures-clerk.house.gov and efdsearch.senate.gov.
+        </div>
       </div>
       <a href="https://github.com/samsnowy/TrackMyCongress" target="_blank"
         class="card flex items-center gap-2 px-4 py-2 text-sm transition-colors hover:border-slate-500">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <path
-            d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
-        </svg>
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
         View source on GitHub
       </a>
     </div>
   </footer>
 
-  <script>
-    ['live-reliable-count','method-reliable-count','caveat-reliable-count'].forEach(function(id) {
-      var el = document.getElementById(id);
-      if (el) el.textContent = STATS.reliable_count;
-    });
-
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.borderColor = '#1e293b';
-
-    // ── Hold period chart ──────────────────────────────────────────────────
-    new Chart(document.getElementById('holdChart'), {
-      type: 'bar',
-      data: {
-        labels: SENSITIVITY.map(s => s.hold + 'd'),
-        datasets: [
-          {
-            label: 'Congress (reliable group)',
-            data: SENSITIVITY.map(s => s.avg_ret),
-            backgroundColor: '#10b981',
-            borderRadius: 4,
-            borderSkipped: false,
-          },
-          {
-            label: 'SPY (same window)',
-            data: SENSITIVITY.map(s => s.spy),
-            backgroundColor: '#334155',
-            borderRadius: 4,
-            borderSkipped: false,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
-          tooltip: {
-            callbacks: { label: ctx => ` ${ctx.dataset.label}: +${ctx.raw}%` }
-          }
-        },
-        scales: {
-          x: { grid: { color: '#1e293b' }, border: { color: '#334155' } },
-          y: {
-            grid: { color: '#1e293b' },
-            border: { color: '#334155' },
-            ticks: { callback: v => `+${v}%` }
-          }
-        }
-      }
-    });
-
-    // ── Top performers chart ───────────────────────────────────────────────
-    const politicians = [...POLITICIANS].sort((a, b) => b.excess - a.excess);
-
-    new Chart(document.getElementById('politiciansChart'), {
-      type: 'bar',
-      data: {
-        labels: politicians.map(p => p.name),
-        datasets: [{
-          label: 'Avg Excess Return (90d)',
-          data: politicians.map(p => p.excess),
-          backgroundColor: politicians.map(p => {
-            if (p.trades >= 80) return '#10b981';
-            if (p.trades >= 30) return '#34d399';
-            return '#6ee7b7';
-          }),
-          borderRadius: 4,
-          borderSkipped: false,
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => [
-                ` Excess: +${politicians[ctx.dataIndex].excess}%`,
-                ` Trades: ${politicians[ctx.dataIndex].trades}`
-              ]
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: '#1e293b' },
-            border: { color: '#334155' },
-            ticks: { maxRotation: 40, minRotation: 30, font: { size: 11 } }
-          },
-          y: {
-            grid: { color: '#1e293b' },
-            border: { color: '#334155' },
-            ticks: { callback: v => `+${v}%` }
-          }
-        }
-      }
-    });
-
-    // ── High-conviction sensitivity table ─────────────────────────────────
-    (function() {
-      if (typeof HC_SENSITIVITY === 'undefined' || !HC_SENSITIVITY.length) return;
-      const tbody = document.getElementById('hcSensitivityBody');
-      tbody.innerHTML = HC_SENSITIVITY.map((s, i) => {
-        const isLast  = i === HC_SENSITIVITY.length - 1;
-        const boldRow = isLast ? 'font-bold text-white' : 'font-medium';
-        const exBold  = isLast ? 'font-bold text-base'  : 'font-semibold';
-        const border  = isLast ? '' : 'border-b';
-        return `<tr class="${border}" style="border-color:#0f172a">
-          <td class="px-5 py-3.5 font-mono ${boldRow}">${s.hold}d</td>
-          <td class="text-right px-5 py-3.5 ${isLast ? 'font-semibold' : ''}" style="color:#94a3b8">${s.trades.toLocaleString()}</td>
-          <td class="text-right px-5 py-3.5 ${isLast ? 'font-semibold' : ''}">+${s.avg_ret}%</td>
-          <td class="text-right px-5 py-3.5" style="color:#64748b">+${s.spy}%</td>
-          <td class="text-right px-5 py-3.5 ${exBold}" style="color:#f59e0b">+${s.excess}%</td>
-          <td class="text-right px-5 py-3.5" style="color:#cbd5e1">${s.win_pct}%</td>
-        </tr>`;
-      }).join('');
-    })();
-
-    // ── High-conviction politicians chart ──────────────────────────────────
-    (function() {
-      if (typeof HC_POLITICIANS === 'undefined' || !HC_POLITICIANS.length) return;
-      const sorted = [...HC_POLITICIANS].sort((a, b) => b.excess - a.excess);
-      new Chart(document.getElementById('hcPoliticiansChart'), {
-        type: 'bar',
-        data: {
-          labels: sorted.map(p => p.name),
-          datasets: [{
-            label: 'Avg Excess Return (90d, >$15k trades)',
-            data: sorted.map(p => p.excess),
-            backgroundColor: sorted.map(p =>
-              p.trades >= 50 ? '#f59e0b' : p.trades >= 25 ? '#fbbf24' : '#fcd34d'
-            ),
-            borderRadius: 4,
-            borderSkipped: false,
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: ctx => [
-                  ` Excess: +${sorted[ctx.dataIndex].excess}%`,
-                  ` Trades: ${sorted[ctx.dataIndex].trades}`
-                ]
-              }
-            }
-          },
-          scales: {
-            x: { grid: { color: '#1e293b' }, border: { color: '#334155' }, ticks: { font: { size: 11 } } },
-            y: { grid: { color: '#1e293b' }, border: { color: '#334155' }, ticks: { callback: v => `+${v}%` } }
-          }
-        }
-      });
-    })();
-
-    // ── Strategy 2 table ──────────────────────────────────────────────────
-    (function() {
-      if (typeof STRATEGY2 === 'undefined' || !STRATEGY2.length) return;
-      const maxExcess = Math.max(...STRATEGY2.map(r => r.excess));
-      const tbody = document.getElementById('strategy2Body');
-      tbody.innerHTML = STRATEGY2.map((r, i) => {
-        const isBest   = r.excess === maxExcess;
-        const isLast   = i === STRATEGY2.length - 1;
-        const boldRow  = isBest  ? 'font-bold text-white' : 'font-medium';
-        const exBold   = isBest  ? 'font-bold text-base'  : 'font-semibold';
-        const border   = isLast  ? '' : 'border-b';
-        const bestMark = isBest  ? ' ◀' : '';
-        return `<tr class="${border}" style="border-color:#0f172a${isBest ? ';background:#f59e0b08' : ''}">
-          <td class="px-5 py-3.5 font-mono ${boldRow}">+${r.hold_after_sell}d${bestMark}</td>
-          <td class="text-right px-5 py-3.5" style="color:#94a3b8">${r.pairs}</td>
-          <td class="text-right px-5 py-3.5 ${isBest ? 'font-semibold' : ''}">+${r.avg_ret}%</td>
-          <td class="text-right px-5 py-3.5" style="color:#64748b">+${r.spy}%</td>
-          <td class="text-right px-5 py-3.5 ${exBold}" style="color:#f59e0b">+${r.excess}%</td>
-          <td class="text-right px-5 py-3.5" style="color:#cbd5e1">${r.win_pct}%</td>
-        </tr>`;
-      }).join('');
-    })();
-
-    // ── Strategy 2 chart ──────────────────────────────────────────────────
-    (function() {
-      if (typeof STRATEGY2 === 'undefined' || !STRATEGY2.length) return;
-      new Chart(document.getElementById('strategy2Chart'), {
-        type: 'bar',
-        data: {
-          labels: STRATEGY2.map(r => '+' + r.hold_after_sell + 'd'),
-          datasets: [
-            {
-              label: 'Congress (Strategy 2)',
-              data: STRATEGY2.map(r => r.avg_ret),
-              backgroundColor: '#f59e0b',
-              borderRadius: 4,
-              borderSkipped: false,
-            },
-            {
-              label: 'SPY (same window)',
-              data: STRATEGY2.map(r => r.spy),
-              backgroundColor: '#334155',
-              borderRadius: 4,
-              borderSkipped: false,
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
-            tooltip: {
-              callbacks: {
-                label: ctx => ` ${ctx.dataset.label}: +${ctx.raw}%`,
-                afterBody: (items) => {
-                  const i = items[0].dataIndex;
-                  return `  Excess: +${STRATEGY2[i].excess}%`;
-                }
-              }
-            }
-          },
-          scales: {
-            x: { grid: { color: '#1e293b' }, border: { color: '#334155' } },
-            y: {
-              grid: { color: '#1e293b' },
-              border: { color: '#334155' },
-              ticks: { callback: v => `+${v}%` }
-            }
-          }
-        }
-      });
-    })();
-
-    // ── Options hold period chart ──────────────────────────────────────────
-    new Chart(document.getElementById('optionsChart'), {
-      type: 'bar',
-      data: {
-        labels: ['30d', '60d', '90d'],
-        datasets: [
-          {
-            label: 'Options signal (buy underlying)',
-            data: [3.8, 0.9, 0.8],
-            backgroundColor: '#818cf8',
-            borderRadius: 4,
-            borderSkipped: false,
-          },
-          {
-            label: 'Stock signal',
-            data: [1.1, 1.8, 2.3],
-            backgroundColor: '#334155',
-            borderRadius: 4,
-            borderSkipped: false,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { position: 'bottom', labels: { boxWidth: 12, padding: 16 } },
-          tooltip: {
-            callbacks: { label: ctx => ` ${ctx.dataset.label}: +${ctx.raw}%` }
-          }
-        },
-        scales: {
-          x: { grid: { color: '#1e293b' }, border: { color: '#334155' } },
-          y: {
-            grid: { color: '#1e293b' },
-            border: { color: '#334155' },
-            ticks: { callback: v => `+${v}%` }
-          }
-        }
-      }
-    });
-  </script>
+  <script src="charts.js"></script>
 </body>
-
 </html>

@@ -230,7 +230,7 @@ def cmd_strategy2():
         return
 
     print(f"\n--- Strategy 2: buy on buy_filed, exit on sell_filed + N days ---")
-    print(f"  (Strategy 1 benchmark: buy on buy_filed, exit after fixed 90d -- +2.4% excess)\n")
+    print(f"  (Strategy 1 benchmark: buy on buy_filed, exit after fixed 90d -- +4.8% excess, 12-pol all-trades)\n")
     print(f"  {'Hold after sell':>16}  {'Pairs':>6}  {'Avg Ret':>8}  {'SPY':>7}  {'Excess':>8}  {'Win%':>6}")
     print("  " + "-" * 62)
     for _, row in results.iterrows():
@@ -520,6 +520,47 @@ def cmd_highconv():
     print(f"  Run: python main.py export   to update docs/data.js")
 
 
+def cmd_walkforward():
+    """
+    Walk-forward validation: train reliable group on 2022-2023, test OOS on 2024-2026.
+    Also runs the HC (>$15k) variant side by side.
+    """
+    from congress.loader import load_for_backtest
+    from congress.backtest import prefetch_prices
+    from congress.walkforward import run_walk_forward, print_walk_forward
+    from config import RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES
+
+    print("Loading scraped congress trades (House + Senate)...")
+    df_all = load_for_backtest(purchases_only=True)
+    print(f"  {len(df_all):,} purchases loaded  ({df_all['ReportDate'].min().date()} to {df_all['ReportDate'].max().date()})")
+
+    # HC filter (>$15k trades)
+    low_conv = df_all["amount_range"].str.startswith("$1,001", na=False)
+    df_hc = df_all[~low_conv].copy()
+    print(f"  HC subset: {len(df_hc):,} purchases (>$15k, {len(df_hc)/len(df_all)*100:.0f}%)")
+
+    print("\nPrefetching prices (once, covers full 2022–2026 range)...")
+    closes = prefetch_prices(df_all)
+
+    # --- All-trades walk-forward ---
+    r_all = run_walk_forward(
+        df_all, closes,
+        hold_days=90,
+        min_excess=RELIABLE_MIN_EXCESS,
+        min_trades=RELIABLE_MIN_TRADES,
+    )
+    print_walk_forward(r_all, label="All Trades")
+
+    # --- HC walk-forward ---
+    r_hc = run_walk_forward(
+        df_hc, closes,
+        hold_days=90,
+        min_excess=RELIABLE_MIN_EXCESS,
+        min_trades=RELIABLE_MIN_TRADES,
+    )
+    print_walk_forward(r_hc, label="High-Conviction (>$15k trades)")
+
+
 def cmd_export():
     """Regenerate docs/data.js — preserves SENSITIVITY from last followcongress run."""
     import os
@@ -555,6 +596,7 @@ COMMANDS = {
     "optionsreliable": cmd_optionsreliable,
     "strategy2":       cmd_strategy2,
     "highconv":        cmd_highconv,
+    "walkforward":     cmd_walkforward,
     "account":         cmd_account,
     "live":            cmd_live,
     "export":          cmd_export,
@@ -563,6 +605,6 @@ COMMANDS = {
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else None
     if cmd not in COMMANDS:
-        print("Usage: python main.py [congress | followcongress | paircongress | congressoptions | optionsreliable | account | live]")
+        print("Usage: python main.py [congress | followcongress | paircongress | congressoptions | optionsreliable | highconv | walkforward | strategy2 | account | live | export]")
         sys.exit(1)
     COMMANDS[cmd]()

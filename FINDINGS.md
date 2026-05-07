@@ -102,6 +102,32 @@ The 12 "reliable" politicians were selected using the same 2022–2026 dataset t
 
 **Why Strategy 2 (sell-filing exit) doesn't work for HC:** only 30 matched buy/sell pairs exist for the 4 HC politicians — too small a sample for a stable signal.
 
+### HC group composition audit (2025 OOS data)
+
+Per-politician breakdown of what they are actually trading and where the alpha comes from:
+
+**David McCormick (+8.9% excess) — pure Bitcoin DCA, not stock-picking.**
+All 24 HC trades are BITB (a Bitcoin spot ETF). He is systematically dollar-cost-averaging into BTC, not making individual stock calls. The +8.9% excess means Bitcoin outperformed SPY over those holding windows — it is crypto exposure, not informational edge. This number will be positive when BTC beats SPY and negative when it does not. McCormick should not be in a stock-signal strategy.
+
+**Cleo Fields (+7.1% excess) — one outlier + mixed Mag-7.**
+IREN (a Bitcoin mining stock) returned +256.7% excess on a single trade and is doing heavy lifting on his average. His actual Mag-7 buys are noisy: GOOG/TSM/AAPL are positive, but MSFT (-7.7%), META (-20.4%), AMZN (-3.3%), and NFLX (-13.8%) are all negative. Strip IREN and his edge is much weaker. A bull-market tech concentration bias is a real concern, though his Mag-7 results are not uniformly positive.
+
+**Tim Moore (+12.2% excess) — contrarian industrials, most defensible.**
+Not a tech-bull story at all: HOG, Ford (F), AAL, HY (Hyster-Yale), INTC, VZ. INTC carries the result (+78.8% excess across 3 trades) — a beaten-down semiconductor turnaround play, not momentum tech. His other names (AAL, VZ, CNC) are also value/cyclical picks. If the INTC calls reflect genuine informational advantage, this is the strongest case for real signal in the HC group.
+
+**Virginia Foxx (+2.8% excess) — retired January 2025, 1 OOS trade.**
+No longer in Congress. Her 28 HC trades that built the training-period ranking are gone.
+
+### Conclusion
+
+The HC group's +7.9% headline figure is significantly biased:
+- McCormick's contribution is purely a Bitcoin allocation decision.
+- Fields' contribution is dominated by one outlier (IREN) and is otherwise weak on Mag-7 names.
+- Moore is the one politician with a plausible informational edge, but his sample is 38 trades across contrarian names in a single year.
+- Foxx has retired.
+
+Following the HC group as a basket is questionable. A cleaner approach would be to monitor Moore alone (contrarian industrials) and exclude McCormick entirely. Fields could stay with the caveat that IREN-type outliers are low-frequency and hard to count on repeating.
+
 ---
 
 ## Sell-Lag Pair Analysis (Step 3)
@@ -221,6 +247,58 @@ Exercise events are absent from all data sources — they do not appear as stock
 ## Live Strategy (Step 6)
 
 **First dry run: 2026-04-25**
+
+---
+
+## Walk-Forward Validation (Step 7)
+
+**Setup:** Train reliable-group selection on 2022–2023 data only. Then run backtest on 2024–2026 using only the pre-selected politicians — no re-ranking allowed. Run via: `python main.py walkforward`.
+
+Split date: `2024-01-01`. Hold: 90d. Filter: >2% excess, ≥20 trades.
+
+### All-trades result
+
+| Metric | Training (IS) | Test (OOS) |
+|---|---|---|
+| Trades | 176 | 186 |
+| Avg Excess | +5.7% | +0.8% |
+| Win Rate | 64% | 49% |
+
+**Training reliable group (3 politicians):** Daniel S Sullivan (+14.8% IS), Thomas Suozzi (+4.9% IS), Markwayne Mullin (+2.5% IS).
+
+OOS breakdown:
+- Sullivan: no OOS trades (retired / left Congress after 2024 election)
+- Suozzi: no OOS trades (lost re-election Nov 2024)
+- Mullin: +0.8% OOS, 186 trades, 49% win rate
+
+**Alpha retention: 14%.** Verdict: edge mostly decayed OOS — mostly driven by politician turnover (2/3 left Congress), not strategy failure.
+
+### High-conviction result (>$15k trades)
+
+| Metric | Training (IS) | Test (OOS) |
+|---|---|---|
+| Trades | 83 | 126 |
+| Avg Excess | +2.2% | +1.4% |
+| Win Rate | 57% | 48% |
+
+**Training reliable group (2 politicians):** Virginia Foxx (+2.5% IS), Markwayne Mullin (+2.0% IS).
+
+OOS breakdown:
+- Foxx: +9.6% OOS — but only 1 trade, not statistically meaningful
+- Mullin: +1.4% OOS, 125 trades, 48% win rate
+
+**Alpha retention: 66%.** Verdict: edge substantially survived OOS for the HC variant.
+
+### Key caveat — live strategy politicians absent from training
+
+The live HC strategy's best performers (Tim Moore, McCormick, Cleo Fields) cannot appear in the training set:
+
+- Tim Moore and David McCormick won their races in November 2024 and took office January 2025 — all trades post-2024.
+- Cleo Fields was elected to the 119th Congress November 2024 — all 64 HC trades are post-2024.
+
+The walk-forward therefore tests a different, weaker politician set than the live strategy uses. The HC test (66% retention on Foxx/Mullin) is a floor estimate; whether Moore, McCormick, and Fields would retain their edge OOS remains untested because there is no pre-2024 data for them to train on.
+
+**Implication:** as the 119th Congress accumulates more trade data (2025–2026), a meaningful out-of-sample test for Moore/McCormick/Fields will become possible. Re-run `walkforward` after mid-2026 when these politicians have 18+ months of OOS data.
 
 ---
 

@@ -84,7 +84,7 @@ Done. Running on Alpaca paper account ($1,000,000 simulated equity).
 **State:** `strategy_state.json` — open positions, closed positions, seen signal keys.  
 **Run:** `python main.py live` (daily) or `python main.py live --dry-run` to simulate.
 
-**Rankings refresh:** `python main.py highconv` regenerates `congress_rankings_hc.csv` (HC strategy) and `congress_rankings.csv` (all-trades, for site findings). Run daily via `run_daily.bat`.
+**Rankings refresh:** `python main.py highconv` regenerates `congress_rankings_hc.csv` (HC strategy) and `congress_rankings.csv` (all-trades, for site findings). Run periodically as new data accumulates.
 
 **First dry run result (2026-04-25):** No stock signals in the 7-day window. One MSFT options signal from Gottheimer's April 8 call purchases (two contracts, same ticker → deduped to one entry). Would buy 117 shares at $424.62, exit May 8.
 
@@ -94,8 +94,8 @@ Done. Running on Alpaca paper account ($1,000,000 simulated equity).
 
 Steps needed to confirm the edge is real and not an in-sample artifact:
 
-- **Walk-forward test** — rank politicians on 2022–2023 data only, then run the backtest on 2024–2026 without touching the training split. If the same names outperform out-of-sample, that's genuine signal.
-- **Permutation test** — randomly shuffle politician→ticker assignments and rerun the backtest 1,000 times to build a null distribution. Check where the observed +2.4% excess sits. If it's in the top 5%, the result is unlikely to be noise.
+- ~~**Walk-forward test**~~ — **Done.** All-trades: 14% alpha retention (Sullivan/Suozzi left Congress; Mullin +0.8% OOS). HC: 66% retention (Foxx/Mullin). Live strategy's best politicians (Moore, McCormick, Fields) all joined post-2024 and cannot be tested — re-run after mid-2026.
+- **Permutation test** — randomly shuffle politician→ticker assignments and rerun the backtest 1,000 times to build a null distribution. Check where the observed +7.9% excess (HC) sits. If it's in the top 5%, the result is unlikely to be noise.
 - **Transaction cost sensitivity** — rerun the backtest at 0.25%, 0.5%, and 1.0% round-trip friction. Identify the break-even cost where the edge disappears.
 - **Risk-adjusted returns** — compute beta of the follow-congress portfolio vs SPY and derive alpha. If excess returns vanish after beta adjustment, the strategy is just holding higher-volatility stocks, not exploiting an informational edge.
 

@@ -60,12 +60,11 @@ _FALLBACK_RELIABLE: dict[str, dict] = {
 def load_reliable_politicians(rankings_csv: str = "congress_rankings.csv") -> dict[str, dict]:
     """
     Load the reliable politician list from a saved backtest rankings CSV.
-    Prefers congress_rankings_hc.csv (high-conviction, >$15k trades) when present.
+    Uses congress_rankings.csv (all-trades, 12 politicians) by default.
     Falls back to the embedded list if no CSV exists.
-    Generate with: python main.py highconv  (preferred) or followcongress.
+    Generate with: python main.py followcongress.
     """
-    # Prefer HC rankings (high-conviction strategy) over all-trades rankings
-    for path in ("congress_rankings_hc.csv", os.path.basename(rankings_csv)):
+    for path in (os.path.basename(rankings_csv), "congress_rankings_hc.csv"):
         if not os.path.exists(path):
             continue
         try:
@@ -131,8 +130,7 @@ def detect_new_signals(
     candidates = df[
         (df["Transaction"] == "Purchase") &
         (df["ReportDate"] >= cutoff) &
-        (df["ReportDate"] >= fresh) &
-        (~df["Range"].apply(_is_low_conviction))
+        (df["ReportDate"] >= fresh)
     ]
 
     signals = []
