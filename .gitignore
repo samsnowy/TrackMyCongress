@@ -10,4 +10,5 @@ venv/
 *.json
 .claude/
 CLAUDE.md
+AGENTS.md
 *.bat
