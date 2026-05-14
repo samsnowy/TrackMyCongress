@@ -16,10 +16,18 @@ Run:
 """
 
 import json
+import math
 import os
 from datetime import date, datetime, timedelta
 
-from config import HOLD_DAYS, MAX_POSITIONS, POSITION_SIZE_PCT, SIMULATED_EQUITY
+from config import (
+    CASH_BUFFER_PCT,
+    HOLD_DAYS,
+    MAX_POSITIONS,
+    PARKING_TICKER,
+    POSITION_SIZE_PCT,
+    SIMULATED_EQUITY,
+)
 from congress.fetcher import fetch_trades
 from congress.strategy import (
     all_signal_keys_for_ticker,
@@ -72,6 +80,78 @@ def _calc_qty(equity: float, price: float) -> int:
     return max(1, int(equity * POSITION_SIZE_PCT / price))
 
 
+def _position_qty(positions: list[dict], ticker: str) -> float:
+    for pos in positions:
+        if pos.get("ticker") == ticker:
+            return float(pos.get("qty", 0))
+    return 0.0
+
+
+def _sell_parking_for_cash(
+    *,
+    needed_cash: float,
+    cash: float,
+    equity: float,
+    parking_qty: float,
+    parking_price: float | None,
+    dry_run: bool,
+    place_order,
+) -> tuple[float, float]:
+    """Sell enough parking shares to fund a signal order plus the cash buffer."""
+    target_cash = needed_cash + equity * CASH_BUFFER_PCT
+    shortfall = target_cash - cash
+    if shortfall <= 0:
+        return cash, parking_qty
+
+    if not parking_price or parking_qty <= 0:
+        print(f"          -> parking: need ${shortfall:,.0f}, no {PARKING_TICKER} available to sell")
+        return cash, parking_qty
+
+    qty = min(int(parking_qty), max(1, math.ceil(shortfall / parking_price)))
+    if qty <= 0:
+        print(f"          -> parking: {PARKING_TICKER} position is fractional-only, cannot sell whole shares")
+        return cash, parking_qty
+
+    print(f"          -> parking: sell {qty} {PARKING_TICKER} to free about ${qty * parking_price:,.0f}")
+    if not dry_run and place_order:
+        r = place_order(PARKING_TICKER, "sell", qty)
+        print(f"             {PARKING_TICKER} order {r['id']} ({r['status']})")
+
+    return cash + qty * parking_price, max(0.0, parking_qty - qty)
+
+
+def _sweep_cash_to_parking(
+    *,
+    cash: float,
+    equity: float,
+    parking_price: float | None,
+    dry_run: bool,
+    place_order,
+) -> float:
+    """Invest idle cash above the buffer into the parking ticker."""
+    target_cash = equity * CASH_BUFFER_PCT
+    excess = cash - target_cash
+    if excess <= 0:
+        return cash
+
+    if not parking_price:
+        print(f"\n--- Parking cash ---")
+        print(f"  skip: could not fetch {PARKING_TICKER} price")
+        return cash
+
+    qty = int(excess / parking_price)
+    if qty <= 0:
+        return cash
+
+    print(f"\n--- Parking cash ---")
+    print(f"  BUY   {PARKING_TICKER:<6}  qty={qty}  value=${qty * parking_price:,.0f}  cash_buffer=${target_cash:,.0f}")
+    if not dry_run and place_order:
+        r = place_order(PARKING_TICKER, "buy", qty)
+        print(f"        order {r['id']} ({r['status']})")
+
+    return cash - qty * parking_price
+
+
 # ---------------------------------------------------------------------------
 # Main runner
 # ---------------------------------------------------------------------------
@@ -93,17 +173,25 @@ def run_live(dry_run: bool = False) -> None:
 
     # --- Alpaca connection ---
     equity        = SIMULATED_EQUITY
+    cash          = SIMULATED_EQUITY
     live_tickers  = set()
+    live_positions = []
     _place_order  = None
 
     try:
         from broker.alpaca_paper import get_account, get_positions, place_market_order
-        acct         = get_account()
-        equity       = acct["equity"]
-        live_tickers = {p["ticker"] for p in get_positions()}
-        _place_order = place_market_order
+        acct           = get_account()
+        live_positions = get_positions()
+        equity         = acct["equity"]
+        cash           = acct["cash"]
+        live_tickers   = {p["ticker"] for p in live_positions}
+        _place_order   = place_market_order
         print(f"  Alpaca equity        : ${equity:,.2f}")
+        print(f"  Alpaca cash          : ${cash:,.2f}")
         print(f"  Live positions       : {len(live_tickers)}")
+        parking_qty = _position_qty(live_positions, PARKING_TICKER)
+        if parking_qty:
+            print(f"  Parking position     : {parking_qty:g} {PARKING_TICKER}")
     except Exception as e:
         if dry_run:
             print(f"  Alpaca unavailable ({e}) — simulating with ${SIMULATED_EQUITY:,.0f}")
@@ -111,6 +199,9 @@ def run_live(dry_run: bool = False) -> None:
             print(f"  [error] Alpaca connection failed: {e}")
             print("  Add API keys to .env or use --dry-run to simulate.")
             return
+
+    parking_qty = _position_qty(live_positions, PARKING_TICKER)
+    parking_price = get_latest_price(PARKING_TICKER)
 
     # --- Process exits ---
     to_exit = positions_to_exit(open_pos, today)
@@ -144,6 +235,7 @@ def run_live(dry_run: bool = False) -> None:
             try:
                 r = _place_order(ticker, "sell", qty)
                 print(f"         order {r['id']} ({r['status']})")
+                cash += qty * exit_price
             except Exception as e:
                 print(f"         [error] sell failed for {ticker}: {e} — keeping position open")
                 remaining.append(pos)
@@ -250,16 +342,38 @@ def run_live(dry_run: bool = False) -> None:
         # NOTE: equity is captured once at run start (line ~100) and not updated after exits
         # within the same run, so position sizing for later entries uses pre-exit equity.
         # Fine in practice (at most a few exits per run) but worth knowing if sizing feels off.
+        order_value = qty * price
         order_id = "dry-run"
         if not dry_run and _place_order:
             try:
+                cash, parking_qty = _sell_parking_for_cash(
+                    needed_cash=order_value,
+                    cash=cash,
+                    equity=equity,
+                    parking_qty=parking_qty,
+                    parking_price=parking_price,
+                    dry_run=dry_run,
+                    place_order=_place_order,
+                )
                 r        = _place_order(ticker, "buy", qty)
                 order_id = r["id"]
                 print(f"          -> order {order_id} ({r['status']})")
+                cash -= order_value
             except Exception as e:
                 print(f"          -> [error] {e}")
                 seen.update(raw_keys)
                 continue
+        elif dry_run:
+            cash, parking_qty = _sell_parking_for_cash(
+                needed_cash=order_value,
+                cash=cash,
+                equity=equity,
+                parking_qty=parking_qty,
+                parking_price=parking_price,
+                dry_run=dry_run,
+                place_order=_place_order,
+            )
+            cash -= order_value
 
         # NOTE: if _place_order is None (broker unreachable, non-dry-run), the block above is
         # skipped entirely and order_id stays "dry-run". The position is still appended below,
@@ -307,6 +421,14 @@ def run_live(dry_run: bool = False) -> None:
             )
     else:
         print("  (none)")
+
+    cash = _sweep_cash_to_parking(
+        cash=cash,
+        equity=equity,
+        parking_price=parking_price,
+        dry_run=dry_run,
+        place_order=_place_order,
+    )
 
     # --- Persist ---
     state["open_positions"]  = open_pos

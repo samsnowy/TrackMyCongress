@@ -86,12 +86,13 @@ Two signal types, one execution path. State persisted in `strategy_state.json`. 
 
 | Signal | Source | Filter | Hold |
 |--------|--------|--------|------|
-| Stock purchase | Quiver live feed (7-day lookback) | HC group (4 pols, >$15k trades, avg excess >2% + ≥20 HC trades) | 90 days |
+| Stock purchase | Quiver live feed (7-day lookback) | 12 reliable politicians (avg excess >2% + >=20 trades) | 90 days |
 | Deep ITM call | Quiver `TickerType==OP` (30-day lookback) | Gottheimer / Pelosi / Ross / Bresnahan + `strike/price < 0.85` | 30 days |
 
 **Sizing:** 5% of equity per position, max 15 simultaneous positions.
+Idle cash is parked in SPY with a 1% cash buffer; signal entries sell SPY as needed before buying.
 
-Multiple politicians buying the same ticker within the lookback window are deduplicated into one `[ACCUMULATION]` signal. Rankings refreshed periodically via `python main.py highconv`.
+Multiple politicians buying the same ticker within the lookback window are deduplicated into one `[ACCUMULATION]` signal. Rankings refreshed periodically via `python main.py followcongress`.
 
 ---
 

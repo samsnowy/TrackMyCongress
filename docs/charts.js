@@ -74,6 +74,20 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function money(n) {
+  return '$' + Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+function signedMoney(n) {
+  var v = Number(n || 0);
+  return (v >= 0 ? '+' : '-') + money(Math.abs(v));
+}
+
+function signedPct(n) {
+  var v = Number(n || 0);
+  return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+}
+
 var PAGE_SIZE = 20;
 var _currentRows = FILINGS;
 var _currentPage = 0;
@@ -144,6 +158,53 @@ function filterFilings(mode) {
 }
 
 renderFilings(FILINGS);
+
+// Portfolio snapshot
+(function() {
+  var tbody = document.getElementById('livePositionsBody');
+  if (!tbody) return;
+  var portfolio = typeof PORTFOLIO !== 'undefined' ? PORTFOLIO : {};
+  var positions = Array.isArray(portfolio.positions) ? portfolio.positions : [];
+  var count = document.getElementById('livePositionsCount');
+  var asOf = portfolio.as_of ? ' · ' + portfolio.as_of : '';
+  if (count) count.textContent = positions.length + (positions.length === 1 ? ' position' : ' positions') + asOf;
+
+  var totalPl = Number(portfolio.total_pl || 0);
+  var totalPlText = signedMoney(totalPl) + ' (' + signedPct(Number(portfolio.total_pl_pct || 0)) + ')';
+  var totalPlColor = totalPl >= 0 ? '#34d399' : '#f87171';
+  var fields = [
+    ['portfolioEquity', money(portfolio.equity)],
+    ['portfolioTotalPl', totalPlText, totalPlColor],
+    ['portfolioCash', money(portfolio.cash)],
+    ['portfolioInvested', money(portfolio.market_value)]
+  ];
+  fields.forEach(function(f) {
+    var el = document.getElementById(f[0]);
+    if (!el) return;
+    el.textContent = f[1];
+    if (f[2]) el.style.color = f[2];
+  });
+
+  if (!positions.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-5 text-center" style="color:#64748b">No open paper positions available.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = positions.map(function(p, i) {
+    var rowBg = i % 2 === 0 ? '' : 'style="background:#0f172a40"';
+    var role = p.role === 'parking' ? 'SPY parking' : 'Signal';
+    var pl = Number(p.unrealized_pl || 0);
+    var plColor = pl >= 0 ? '#34d399' : '#f87171';
+    return '<tr ' + rowBg + '>'
+      + '<td class="px-4 py-2.5 font-mono font-bold" style="color:#f1f5f9">' + esc(p.ticker) + '</td>'
+      + '<td class="px-4 py-2.5" style="color:#cbd5e1">' + esc(role) + '</td>'
+      + '<td class="px-4 py-2.5 text-right font-mono" style="color:#cbd5e1">' + Number(p.qty || 0).toLocaleString() + '</td>'
+      + '<td class="px-4 py-2.5 text-right font-mono" style="color:#cbd5e1">$' + Number(p.avg_entry || 0).toFixed(2) + '</td>'
+      + '<td class="px-4 py-2.5 text-right font-mono" style="color:#cbd5e1">$' + Number(p.current_price || 0).toFixed(2) + '</td>'
+      + '<td class="px-4 py-2.5 text-right font-mono" style="color:#cbd5e1">' + money(p.market_value) + '</td>'
+      + '<td class="px-4 py-2.5 text-right font-mono font-semibold" style="color:' + plColor + '">' + signedMoney(pl) + ' <span style="font-size:11px">(' + signedPct(Number(p.unrealized_pct || 0)) + ')</span></td>'
+      + '</tr>';
+  }).join('');
+})();
 
 // ── Charts ────────────────────────────────────────────────────────────────────
 Chart.defaults.color = '#94a3b8';

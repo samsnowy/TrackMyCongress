@@ -396,6 +396,8 @@ def _write_data_js(sensitivity: list, generated: str, reliable_count: int, polit
     s2 = strategy2 if strategy2 is not None else []
     hc_sensitivity  = (hc or {}).get("sensitivity", [])
     hc_politicians  = (hc or {}).get("politicians", [])
+    live_positions = _read_live_positions()
+    portfolio = _read_portfolio_snapshot(live_positions)
 
     out_path = os.path.join("docs", "data.js")
     with open(out_path, "w", encoding="utf-8") as f:
@@ -407,10 +409,12 @@ def _write_data_js(sensitivity: list, generated: str, reliable_count: int, polit
         f.write(f"const POLITICIANS = {json.dumps(politicians, indent=2)};\n\n")
         f.write(f"const HC_SENSITIVITY = {json.dumps(hc_sensitivity, indent=2)};\n\n")
         f.write(f"const HC_POLITICIANS = {json.dumps(hc_politicians, indent=2)};\n\n")
+        f.write(f"const LIVE_POSITIONS = {json.dumps(live_positions, indent=2)};\n\n")
+        f.write(f"const PORTFOLIO = {json.dumps(portfolio, indent=2)};\n\n")
         f.write(f"const FILINGS = {json.dumps(filings, indent=2)};\n")
 
     print(f"  [data.js] Written: {out_path}")
-    print(f"  {len(filings)} filings | {len(politicians)} politicians | {len(hc_politicians)} HC politicians | {len(s2)} strategy2 rows")
+    print(f"  {len(filings)} filings | {len(politicians)} politicians | {len(hc_politicians)} HC politicians | {len(s2)} strategy2 rows | {len(live_positions)} live positions | portfolio: {portfolio.get('source', 'unknown')}")
     print(f"  Commit docs/data.js to update the GitHub Pages site.")
 
 
@@ -454,6 +458,111 @@ def _read_highconv() -> dict:
             return json.load(f)
     except Exception:
         return {}
+
+
+def _read_live_positions() -> list:
+    """Read open live-strategy positions from strategy_state.json for the site."""
+    import json, os
+    path = "strategy_state.json"
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path) as f:
+            state = json.load(f)
+    except Exception:
+        return []
+
+    positions = []
+    for pos in state.get("open_positions", []):
+        positions.append({
+            "ticker":       pos.get("ticker", ""),
+            "source":       pos.get("source", "stock"),
+            "qty":          pos.get("qty", 0),
+            "entry_date":   pos.get("entry_date", ""),
+            "signal_date":  pos.get("signal_date", ""),
+            "planned_exit": pos.get("planned_exit", ""),
+            "entry_price":  round(float(pos.get("entry_price") or 0), 2),
+            "order_id":     pos.get("order_id", ""),
+            "politicians":  pos.get("politicians", []),
+        })
+    return positions
+
+
+def _read_portfolio_snapshot(live_positions: list | None = None) -> dict:
+    """Read current Alpaca portfolio values for the site, falling back to local state."""
+    from datetime import datetime
+    from config import PARKING_TICKER
+
+    try:
+        from broker.alpaca_paper import get_account, get_positions
+        acct = get_account()
+        broker_positions = get_positions()
+        positions = []
+        total_unrealized = 0.0
+        total_market_value = 0.0
+        for p in broker_positions:
+            qty = float(p.get("qty") or 0)
+            current = float(p.get("current_price") or 0)
+            avg_entry = float(p.get("avg_entry") or 0)
+            unrealized = float(p.get("unrealized_pl") or 0)
+            market_value = qty * current
+            total_market_value += market_value
+            total_unrealized += unrealized
+            positions.append({
+                "ticker":          p.get("ticker", ""),
+                "qty":             qty,
+                "avg_entry":       round(avg_entry, 2),
+                "current_price":   round(current, 2),
+                "market_value":    round(market_value, 2),
+                "unrealized_pl":   round(unrealized, 2),
+                "unrealized_pct":  round((current / avg_entry - 1) * 100, 2) if avg_entry else 0,
+                "role":            "parking" if p.get("ticker") == PARKING_TICKER else "signal",
+            })
+
+        initial_equity = 1_000_000.0
+        equity = float(acct.get("equity") or 0)
+        return {
+            "source":             "alpaca",
+            "as_of":              datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "initial_equity":     initial_equity,
+            "equity":             round(equity, 2),
+            "cash":               round(float(acct.get("cash") or 0), 2),
+            "buying_power":       round(float(acct.get("buying_power") or 0), 2),
+            "portfolio_value":    round(float(acct.get("portfolio_value") or equity), 2),
+            "total_pl":           round(equity - initial_equity, 2),
+            "total_pl_pct":       round((equity / initial_equity - 1) * 100, 2) if initial_equity else 0,
+            "unrealized_pl":      round(total_unrealized, 2),
+            "market_value":       round(total_market_value, 2),
+            "positions":          positions,
+        }
+    except Exception as e:
+        positions = []
+        for p in live_positions or []:
+            positions.append({
+                "ticker":          p.get("ticker", ""),
+                "qty":             p.get("qty", 0),
+                "avg_entry":       p.get("entry_price", 0),
+                "current_price":   0,
+                "market_value":    0,
+                "unrealized_pl":   0,
+                "unrealized_pct":  0,
+                "role":            "parking" if p.get("ticker") == PARKING_TICKER else "signal",
+            })
+        return {
+            "source":             "strategy_state",
+            "error":              str(e),
+            "as_of":              datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "initial_equity":     1_000_000.0,
+            "equity":             0,
+            "cash":               0,
+            "buying_power":       0,
+            "portfolio_value":    0,
+            "total_pl":           0,
+            "total_pl_pct":       0,
+            "unrealized_pl":      0,
+            "market_value":       0,
+            "positions":          positions,
+        }
 
 
 def cmd_highconv():

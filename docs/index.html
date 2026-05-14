@@ -305,7 +305,48 @@
       <div class="card p-4 text-sm flex flex-wrap gap-x-8 gap-y-2" style="background:#1e293b80">
         <div><span style="color:#64748b">Sizing</span> <span class="font-semibold ml-2">5% of equity per position</span></div>
         <div><span style="color:#64748b">Max positions</span> <span class="font-semibold ml-2">15</span></div>
+        <div><span style="color:#64748b">Idle cash</span> <span class="font-semibold ml-2">Parked in SPY, 1% cash buffer</span></div>
         <div><span style="color:#64748b">Action: buy underlying stock</span> <span style="color:#64748b">&nbsp;&middot;&nbsp; State in</span> <code class="text-xs ml-1" style="color:#94a3b8">strategy_state.json</code></div>
+      </div>
+      <div class="grid md:grid-cols-4 gap-4 mt-5">
+        <div class="card p-4">
+          <div class="text-xs uppercase tracking-wide" style="color:#64748b">Equity</div>
+          <div class="text-2xl font-bold mt-1" id="portfolioEquity">$0</div>
+        </div>
+        <div class="card p-4">
+          <div class="text-xs uppercase tracking-wide" style="color:#64748b">Total P&amp;L</div>
+          <div class="text-2xl font-bold mt-1" id="portfolioTotalPl">$0</div>
+        </div>
+        <div class="card p-4">
+          <div class="text-xs uppercase tracking-wide" style="color:#64748b">Cash</div>
+          <div class="text-2xl font-bold mt-1" id="portfolioCash">$0</div>
+        </div>
+        <div class="card p-4">
+          <div class="text-xs uppercase tracking-wide" style="color:#64748b">Invested</div>
+          <div class="text-2xl font-bold mt-1" id="portfolioInvested">$0</div>
+        </div>
+      </div>
+      <div class="card overflow-hidden mt-5">
+        <div class="px-4 py-3 border-b flex items-center justify-between" style="border-color:#1e293b">
+          <h3 class="font-semibold">Current portfolio</h3>
+          <span class="text-xs" id="livePositionsCount" style="color:#64748b">0 positions</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="w-full text-sm">
+            <thead style="background:#0f172a;color:#64748b">
+              <tr>
+                <th class="text-left px-4 py-2 font-medium">Ticker</th>
+                <th class="text-left px-4 py-2 font-medium">Role</th>
+                <th class="text-right px-4 py-2 font-medium">Qty</th>
+                <th class="text-right px-4 py-2 font-medium">Avg entry</th>
+                <th class="text-right px-4 py-2 font-medium">Current</th>
+                <th class="text-right px-4 py-2 font-medium">Value</th>
+                <th class="text-right px-4 py-2 font-medium">P&amp;L</th>
+              </tr>
+            </thead>
+            <tbody id="livePositionsBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
