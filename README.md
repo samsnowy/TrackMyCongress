@@ -102,11 +102,12 @@ Multiple politicians buying the same ticker within the lookback window are dedup
 git clone https://github.com/samsnowy/TrackMyCongress
 cd TrackMyCongress
 pip install -r requirements.txt
+cd site && npm install && cd ..
 cp .env.example .env
 # Add your Alpaca paper trading keys to .env (see .env.example)
 ```
 
-Requires **Python 3.10+**.
+Requires **Python 3.10+** and Node.js for the React/GitHub Pages build.
 
 **Data sources:**
 - [Quiver Quant API](https://www.quiverquant.com/) — congressional trade live feed; the live strategy uses their free public endpoint (no API key required). If the endpoint is rate-limited or restricted, a local cache (`congress_trades.csv`) is used as fallback.
@@ -129,12 +130,15 @@ python main.py congressoptions          # options analysis
 python main.py live --dry-run           # simulate strategy without placing orders
 python main.py live                     # run strategy and place paper orders
 python main.py account                  # Alpaca paper account status + open positions
+python main.py export                   # regenerate docs/data.js and build the React site
 
 # Scraping (one-time, resumable)
 python -m congress.scrape_all           # House + Senate PTRs
 python -m congress.scraper              # House only
 python -m congress.senate_scraper       # Senate only
 ```
+
+The GitHub Pages site is authored in `site/` and built into `docs/`. `python main.py export` writes the generated data file, then runs the React build so Pages can serve static files from `docs/`.
 
 **Refresh the reliable politician list periodically** as new data accumulates:
 ```bash
@@ -163,6 +167,8 @@ data/
   fetcher.py          — yfinance OHLCV helpers
 config.py             — loads .env
 main.py               — CLI entry point
+site/                 — React/Vite source for the GitHub Pages dashboard
+docs/                 — built static site served by GitHub Pages
 ```
 
 ---

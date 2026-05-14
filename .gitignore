@@ -8,6 +8,9 @@ venv/
 *.csv
 *.log
 *.json
+!site/package.json
+!site/package-lock.json
+site/node_modules/
 .claude/
 CLAUDE.md
 AGENTS.md

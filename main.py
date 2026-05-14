@@ -12,6 +12,7 @@ Entry point for the congress trades research tool.
 """
 
 import sys
+import subprocess
 
 
 def cmd_congress():
@@ -412,10 +413,38 @@ def _write_data_js(sensitivity: list, generated: str, reliable_count: int, polit
         f.write(f"const LIVE_POSITIONS = {json.dumps(live_positions, indent=2)};\n\n")
         f.write(f"const PORTFOLIO = {json.dumps(portfolio, indent=2)};\n\n")
         f.write(f"const FILINGS = {json.dumps(filings, indent=2)};\n")
+        f.write("\nwindow.TMC_DATA = {\n")
+        f.write("  DATA_GENERATED,\n")
+        f.write("  STATS,\n")
+        f.write("  SENSITIVITY,\n")
+        f.write("  STRATEGY2,\n")
+        f.write("  POLITICIANS,\n")
+        f.write("  HC_SENSITIVITY,\n")
+        f.write("  HC_POLITICIANS,\n")
+        f.write("  LIVE_POSITIONS,\n")
+        f.write("  PORTFOLIO,\n")
+        f.write("  FILINGS,\n")
+        f.write("};\n")
 
-    print(f"  [data.js] Written: {out_path}")
-    print(f"  {len(filings)} filings | {len(politicians)} politicians | {len(hc_politicians)} HC politicians | {len(s2)} strategy2 rows | {len(live_positions)} live positions | portfolio: {portfolio.get('source', 'unknown')}")
-    print(f"  Commit docs/data.js to update the GitHub Pages site.")
+    print(f"  [data.js] Written: {out_path}", flush=True)
+    print(f"  {len(filings)} filings | {len(politicians)} politicians | {len(hc_politicians)} HC politicians | {len(s2)} strategy2 rows | {len(live_positions)} live positions | portfolio: {portfolio.get('source', 'unknown')}", flush=True)
+    _build_site()
+    print(f"  Commit docs/ to update the GitHub Pages site.")
+
+
+def _build_site() -> None:
+    """Build the React site into docs/ when the site workspace exists."""
+    import os
+    if not os.path.exists(os.path.join("site", "package.json")):
+        return
+    npm_cmd = "npm.cmd" if os.name == "nt" else "npm"
+    try:
+        subprocess.run([npm_cmd, "run", "build"], cwd="site", check=True)
+    except FileNotFoundError:
+        print("  [site] npm not found; skipping React build.")
+    except subprocess.CalledProcessError as e:
+        print(f"  [site] build failed with exit code {e.returncode}")
+        raise
 
 
 def _read_existing_sensitivity() -> list:
