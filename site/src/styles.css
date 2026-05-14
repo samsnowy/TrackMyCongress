@@ -1,0 +1,28 @@
+body {
+  font-family: Inter, sans-serif;
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+}
+
+.filing-filter {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.filing-filter:hover {
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+.active-filter {
+  background: #10b98120 !important;
+  border-color: #34d399 !important;
+  color: #34d399 !important;
+}

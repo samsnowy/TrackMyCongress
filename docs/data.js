@@ -265,45 +265,45 @@ const LIVE_POSITIONS = [
 
 const PORTFOLIO = {
   "source": "alpaca",
-  "as_of": "2026-05-14 10:43",
+  "as_of": "2026-05-14 10:58",
   "initial_equity": 1000000.0,
-  "equity": 999719.75,
+  "equity": 1000242.9,
   "cash": 10111.78,
-  "buying_power": 1009831.53,
-  "portfolio_value": 999719.75,
-  "total_pl": -280.25,
-  "total_pl_pct": -0.03,
-  "unrealized_pl": -267.15,
-  "market_value": 989621.07,
+  "buying_power": 1010354.68,
+  "portfolio_value": 1000242.9,
+  "total_pl": 242.9,
+  "total_pl_pct": 0.02,
+  "unrealized_pl": 242.89,
+  "market_value": 990131.11,
   "positions": [
     {
       "ticker": "LLY",
       "qty": 49.0,
       "avg_entry": 1008.94,
-      "current_price": 1009.33,
-      "market_value": 49457.17,
-      "unrealized_pl": 19.11,
-      "unrealized_pct": 0.04,
+      "current_price": 1008.79,
+      "market_value": 49430.95,
+      "unrealized_pl": -7.11,
+      "unrealized_pct": -0.01,
       "role": "signal"
     },
     {
       "ticker": "MRVL",
       "qty": 274.0,
       "avg_entry": 182.0,
-      "current_price": 181.09,
-      "market_value": 49618.66,
-      "unrealized_pl": -249.34,
-      "unrealized_pct": -0.5,
+      "current_price": 182.13,
+      "market_value": 49903.62,
+      "unrealized_pl": 35.62,
+      "unrealized_pct": 0.07,
       "role": "signal"
     },
     {
       "ticker": "SPY",
       "qty": 1191.0,
       "avg_entry": 747.76,
-      "current_price": 747.73,
-      "market_value": 890545.24,
-      "unrealized_pl": -36.92,
-      "unrealized_pct": -0.0,
+      "current_price": 747.94,
+      "market_value": 890796.54,
+      "unrealized_pl": 214.38,
+      "unrealized_pct": 0.02,
       "role": "parking"
     }
   ]
@@ -8592,3 +8592,16 @@ const FILINGS = [
     "low_conv": true
   }
 ];
+
+window.TMC_DATA = {
+  DATA_GENERATED,
+  STATS,
+  SENSITIVITY,
+  STRATEGY2,
+  POLITICIANS,
+  HC_SENSITIVITY,
+  HC_POLITICIANS,
+  LIVE_POSITIONS,
+  PORTFOLIO,
+  FILINGS,
+};
