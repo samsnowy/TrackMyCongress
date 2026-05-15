@@ -111,6 +111,7 @@ Requires **Python 3.10+**.
 **Data sources:**
 - [Quiver Quant API](https://www.quiverquant.com/) — congressional trade live feed; the live strategy uses their free public endpoint (no API key required). If the endpoint is rate-limited or restricted, a local cache (`congress_trades.csv`) is used as fallback.
 - [Alpaca](https://alpaca.markets/) — paper trading account (free, requires API keys in `.env`)
+- Optional executive branch OGE disclosures via `executive_trades.csv`; these are display-only and are not used for backtests or live strategy signals.
 
 The scrapers (`congress/scraper.py`, `congress/senate_scraper.py`) pull directly from public government sources and don't require API keys.
 
@@ -134,7 +135,11 @@ python main.py account                  # Alpaca paper account status + open pos
 python -m congress.scrape_all           # House + Senate PTRs
 python -m congress.scraper              # House only
 python -m congress.senate_scraper       # Senate only
+python main.py executive --recent-months 6 # recent executive OGE 278-T reports
+python -m executive.scraper --url <OGE_278T_PDF_URL> --name "Donald J. Trump" --role President
 ```
+
+Executive OGE rows are display-only; run `python main.py export` after scraping to show them in the recent disclosed trades table.
 
 **Refresh the reliable politician list periodically** as new data accumulates:
 ```bash
@@ -157,10 +162,13 @@ congress/
   options_analysis.py — options overview, straddle analysis, House call backtest
   strategy.py         — pure strategy logic (signal detection, dedup, exit rules)
   live.py             — live strategy orchestrator (Alpaca execution, state management)
+executive/
+  loader.py           — optional OGE executive disclosure loader for dashboard display
+  scraper.py          — discovers/parses OGE 278-T PDFs into executive_trades.csv
 broker/
   alpaca_paper.py     — Alpaca paper trading (orders, positions, account)
 data/
-  fetcher.py          — yfinance OHLCV helpers
+  fetcher.py          — yfinance OHLCV helpers with local daily-close cache
 config.py             — loads .env
 main.py               — CLI entry point
 ```
@@ -177,6 +185,8 @@ Scraped from public government sources:
 | Senate eFDS | efdsearch.senate.gov | HTML/JSON | 2022–present |
 
 Quiver Quant API provides a pre-parsed live feed (~10 months rolling) used for the live strategy.
+
+yfinance daily closes are cached locally in `price_cache/daily_closes.csv`; consecutive backtest runs only fetch missing dates or newly requested tickers. Delisted/bad symbols are remembered in `price_cache/failed_tickers.json` and skipped on later runs.
 
 **What's missing from all data sources:** option exercise events. Exercises do not appear as stock purchases anywhere. Confirmed by auditing all transaction types — no false signal risk.
 

@@ -102,6 +102,7 @@ function renderPage() {
   tbody.innerHTML = page.map(function(r, i) {
     var isBuy  = r.txn === 'Purchase';
     var isOpt  = r.type === 'OP';
+    var isExec = r.source === 'Executive' || r.type === 'EX';
     var rowBg  = i % 2 === 0 ? '' : 'style="background:#0f172a40"';
     var dim    = r.low_conv ? 'opacity:0.45' : '';
     var txnBadge = isBuy
@@ -109,6 +110,9 @@ function renderPage() {
       : '<span style="background:#ef444420;color:#f87171;padding:2px 8px;border-radius:9999px;font-size:11px;font-weight:600">SELL</span>';
     var optBadge = isOpt
       ? ' <span style="background:#818cf820;color:#818cf8;padding:1px 6px;border-radius:9999px;font-size:10px;font-weight:600">OPT</span>'
+      : '';
+    var execBadge = isExec
+      ? ' <span style="background:#f59e0b20;color:#fbbf24;padding:1px 6px;border-radius:9999px;font-size:10px;font-weight:600">EXEC</span>'
       : '';
     var star = r.reliable
       ? '<span title="Reliable group" style="color:#fbbf24;font-size:13px">&#9733;</span>'
@@ -119,8 +123,8 @@ function renderPage() {
     return '<tr ' + rowBg + ' style="' + dim + '">'
       + '<td class="px-4 py-2.5 font-mono text-xs" style="color:#94a3b8;white-space:nowrap">' + esc(r.date) + '</td>'
       + '<td class="px-4 py-2.5 font-mono text-xs" style="color:#64748b;white-space:nowrap">' + esc(r.tx_date) + '</td>'
-      + '<td class="px-4 py-2.5" style="white-space:nowrap"><span style="display:inline-flex;align-items:center">' + dot + '<span style="color:#cbd5e1">' + esc(r.name) + '</span></span></td>'
-      + '<td class="px-4 py-2.5 font-mono font-bold" style="color:#f1f5f9">' + esc(r.ticker) + optBadge + '</td>'
+      + '<td class="px-4 py-2.5" style="white-space:nowrap"><span style="display:inline-flex;align-items:center">' + dot + '<span style="color:#cbd5e1">' + esc(r.name) + '</span></span>' + (isExec && r.role ? '<div class="text-xs" style="color:#64748b">' + esc(r.role) + '</div>' : '') + '</td>'
+      + '<td class="px-4 py-2.5 font-mono font-bold" style="color:#f1f5f9">' + esc(r.ticker) + optBadge + execBadge + '</td>'
       + '<td class="px-4 py-2.5">' + txnBadge + '</td>'
       + '<td class="px-4 py-2.5 text-xs" style="color:#94a3b8;white-space:nowrap">' + esc(r.range) + lowNote + '</td>'
       + '<td class="px-4 py-2.5 text-center">' + star + '</td>'
@@ -151,6 +155,7 @@ function filterFilings(mode) {
   if (mode === 'purchase') rows = rows.filter(function(r) { return r.txn === 'Purchase'; });
   if (mode === 'sale')     rows = rows.filter(function(r) { return r.txn === 'Sale'; });
   if (mode === 'options')  rows = rows.filter(function(r) { return r.type === 'OP'; });
+  if (mode === 'executive')rows = rows.filter(function(r) { return r.source === 'Executive' || r.type === 'EX'; });
   if (mode === 'reliable') rows = rows.filter(function(r) { return r.reliable; });
   if (mode === 'signals')  rows = rows.filter(function(r) { return r.reliable && r.txn === 'Purchase'; });
   if (mode === 'hcsignals')rows = rows.filter(function(r) { return r.hc && r.txn === 'Purchase'; });

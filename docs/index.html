@@ -222,9 +222,9 @@
   <section class="px-6 py-12 border-t" style="border-color:#1e293b">
     <div class="max-w-6xl mx-auto">
       <div class="text-xs font-semibold tracking-widest uppercase mb-2" style="color:#34d399">Static Snapshot</div>
-      <h2 class="text-3xl md:text-4xl font-bold mb-1">Recent STOCK Act filings</h2>
+      <h2 class="text-3xl md:text-4xl font-bold mb-1">Recent disclosed trades</h2>
       <p class="max-w-2xl mb-6 leading-relaxed" style="color:#94a3b8">
-        Last 90 days from the Quiver Quant feed. Not live &mdash; updated when scraper runs.
+        Last 90 days from the Quiver Quant feed plus optional executive OGE disclosures. Not live &mdash; updated when export runs.
         <span style="color:#64748b" id="snapshot-date">Snapshot: 2026-04-30.</span>
       </p>
       <div class="flex flex-wrap gap-2 mb-4" id="filingFilters">
@@ -232,6 +232,7 @@
         <button onclick="filterFilings('purchase')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="purchase">Purchases</button>
         <button onclick="filterFilings('sale')"      class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="sale">Sales</button>
         <button onclick="filterFilings('options')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="options">Options</button>
+        <button onclick="filterFilings('executive')" class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="executive">Executive</button>
         <button onclick="filterFilings('reliable')"  class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="reliable">&#9733; Reliable group</button>
         <button onclick="filterFilings('signals')"   class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="signals">&#9733; Buy signals</button>
         <button onclick="filterFilings('hcsignals')" class="filing-filter px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors" data-filter="hcsignals">&#9733; HC signals</button>

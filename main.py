@@ -9,6 +9,7 @@ Entry point for the congress trades research tool.
   python main.py account             — Alpaca paper account status + open positions
   python main.py live                — run live paper trading strategy
   python main.py live --dry-run      — simulate strategy without placing orders
+  python main.py executive           — scrape recent executive OGE transaction disclosures
 """
 
 import sys
@@ -304,6 +305,11 @@ def cmd_account():
         print("Make sure you've added your API keys to .env (see .env.example)")
 
 
+def cmd_executive():
+    from executive.scraper import main as scrape_executive
+    scrape_executive()
+
+
 def _shorten_name(name: str) -> str:
     """'Daniel S Sullivan' → 'Daniel Sullivan', 'Mark Dr Green' → 'Mark Green'"""
     stops = {"dr", "mr", "mrs", "ms", "jr", "sr", "rep", "sen"}
@@ -323,12 +329,13 @@ def _write_data_js(sensitivity: list, generated: str, reliable_count: int, polit
     from congress.strategy import match_politician
 
     # Last 90 days of filings — all rows, no per-politician cap
+    recent_filings_days = 90
     filings = []
     if os.path.exists("congress_trades.csv") and os.path.exists("congress_rankings.csv"):
         df_t = pd.read_csv("congress_trades.csv")
         df_t["ReportDate"] = pd.to_datetime(df_t["ReportDate"], errors="coerce")
         df_t = df_t.dropna(subset=["ReportDate", "Ticker", "Representative"])
-        cutoff = pd.Timestamp.today() - pd.Timedelta(days=90)
+        cutoff = pd.Timestamp.today() - pd.Timedelta(days=recent_filings_days)
         df_t = df_t[df_t["ReportDate"] >= cutoff].sort_values("ReportDate", ascending=False)
 
         df_r = pd.read_csv("congress_rankings.csv")
@@ -362,10 +369,40 @@ def _write_data_js(sensitivity: list, generated: str, reliable_count: int, polit
                 "type":     t_type if t_type in ("ST", "OP") else "ST",
                 "txn":      str(row.get("Transaction", "")),
                 "range":    amount,
+                "source":   "Congress",
                 "reliable": is_reliable,
                 "hc":       is_hc,
                 "low_conv": is_low_conv,
             })
+
+    try:
+        from executive.loader import load_executive_trades
+        df_exec = load_executive_trades()
+        if not df_exec.empty:
+            cutoff = pd.Timestamp.today() - pd.Timedelta(days=recent_filings_days)
+            df_exec = df_exec[df_exec["filing_date"] >= cutoff].sort_values("filing_date", ascending=False)
+            for _, row in df_exec.iterrows():
+                tx_dt = row.get("transaction_date")
+                filings.append({
+                    "date":     str(row["filing_date"].date()),
+                    "tx_date":  str(tx_dt.date()) if pd.notna(tx_dt) else "",
+                    "name":     str(row["name"]),
+                    "party":    "",
+                    "ticker":   str(row["ticker"]),
+                    "type":     "EX",
+                    "txn":      str(row["transaction"]),
+                    "range":    str(row["amount_range"]),
+                    "source":   "Executive",
+                    "role":     str(row.get("role", "")),
+                    "agency":   str(row.get("agency", "")),
+                    "doc_url":  str(row.get("doc_url", "")),
+                    "reliable": False,
+                    "hc":       False,
+                    "low_conv": str(row["amount_range"]).strip().startswith("$1,001"),
+                })
+            filings.sort(key=lambda r: r.get("date", ""), reverse=True)
+    except Exception as e:
+        print(f"  [executive] skipped executive_trades.csv: {e}")
 
     # Total options count from scraped CSVs
     total_options = 0
@@ -707,6 +744,7 @@ COMMANDS = {
     "highconv":        cmd_highconv,
     "walkforward":     cmd_walkforward,
     "account":         cmd_account,
+    "executive":       cmd_executive,
     "live":            cmd_live,
     "export":          cmd_export,
 }
@@ -714,6 +752,7 @@ COMMANDS = {
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else None
     if cmd not in COMMANDS:
-        print("Usage: python main.py [congress | followcongress | paircongress | congressoptions | optionsreliable | highconv | walkforward | strategy2 | account | live | export]")
+        print("Usage: python main.py [congress | followcongress | paircongress | congressoptions | optionsreliable | highconv | walkforward | strategy2 | account | executive | live | export]")
         sys.exit(1)
+    sys.argv = [sys.argv[0], *sys.argv[2:]]
     COMMANDS[cmd]()
