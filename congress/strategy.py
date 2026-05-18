@@ -26,6 +26,7 @@ from config import (
     SIGNAL_LOOKBACK, OPTIONS_LOOKBACK, DEEP_ITM_THRESHOLD,
     RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES, MAX_SIGNAL_AGE,
 )
+from data.fetcher import clean_ticker_symbol
 
 # Known options-active politicians whose deep-ITM calls signal the underlying.
 # Langevin and Tuberville excluded: Langevin buys OTM speculative calls;
@@ -137,11 +138,14 @@ def detect_new_signals(
     for _, row in candidates.iterrows():
         if not match_politician(str(row["Representative"]), reliable_pols):
             continue
-        key = f"{row['Ticker']}_{row['ReportDate'].date()}_{row['Representative']}"
+        ticker = clean_ticker_symbol(row["Ticker"])
+        if not ticker:
+            continue
+        key = f"{ticker}_{row['ReportDate'].date()}_{row['Representative']}"
         if key in seen:
             continue
         signals.append({
-            "ticker":      str(row["Ticker"]),
+            "ticker":      ticker,
             "politician":  str(row["Representative"]),
             "report_date": str(row["ReportDate"].date()),
             "tx_date":     str(row["TransactionDate"].date()),
@@ -249,7 +253,9 @@ def detect_options_signals(
     signals = []
     for _, row in candidates.iterrows():
         name   = str(row["name"])
-        ticker = str(row["ticker"])
+        ticker = clean_ticker_symbol(row["ticker"])
+        if not ticker:
+            continue
 
         if not _matches_options_politician(name):
             continue

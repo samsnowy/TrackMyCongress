@@ -15,14 +15,34 @@ PRICE_CACHE_CSV = os.path.join(PRICE_CACHE_DIR, "daily_closes.csv")
 FAILED_TICKERS_JSON = os.path.join(PRICE_CACHE_DIR, "failed_tickers.json")
 
 
+def clean_ticker_symbol(ticker: str) -> str:
+    """Normalize disclosure ticker text into a yfinance-compatible symbol."""
+    value = str(ticker).upper().strip()
+    if value in {"", "NAN", "NONE", "NULL", "--"}:
+        return ""
+    value = value.lstrip("$").strip()
+    return value.replace(".", "-")
+
+
 def _clean_tickers(tickers: list[str]) -> list[str]:
-    cleaned = {str(t).upper().strip() for t in tickers if str(t).strip()}
+    cleaned = {clean_ticker_symbol(t) for t in tickers if clean_ticker_symbol(t)}
     cleaned.add("SPY")
     return sorted(cleaned)
 
 
 def _normalize_date(value: pd.Timestamp) -> pd.Timestamp:
     return pd.to_datetime(value).tz_localize(None).normalize()
+
+
+def _has_weekday(start: pd.Timestamp, end: pd.Timestamp) -> bool:
+    """Return True if [start, end) contains at least one weekday."""
+    day = _normalize_date(start)
+    end = _normalize_date(end)
+    while day < end:
+        if day.weekday() < 5:
+            return True
+        day += timedelta(days=1)
+    return False
 
 
 def _load_price_cache(path: str = PRICE_CACHE_CSV) -> pd.DataFrame:
@@ -144,6 +164,8 @@ def fetch_daily_closes(
     for range_start, range_end in missing_ranges:
         if range_start >= range_end:
             continue
+        if not _has_weekday(range_start, range_end):
+            continue
         print(f"  Price cache miss: fetching {len(all_t)} tickers from {range_start.date()} to {range_end.date()}")
         fetched.append(_download_daily_closes(all_t, range_start, range_end))
 
@@ -189,6 +211,9 @@ def fetch_daily_closes(
 
 def get_latest_price(ticker: str) -> float | None:
     """Most recent daily close via yfinance. Used by the live strategy."""
+    ticker = clean_ticker_symbol(ticker)
+    if not ticker:
+        return None
     try:
         hist = yf.Ticker(ticker).history(period="3d")
         if hist.empty:
@@ -201,17 +226,18 @@ def get_latest_price(ticker: str) -> float | None:
 
 def get_latest_prices(tickers: list[str]) -> dict[str, float]:
     """Batch-fetch the most recent closing price for multiple tickers in one call."""
-    if not tickers:
+    requested_tickers = sorted({clean_ticker_symbol(t) for t in tickers if clean_ticker_symbol(t)})
+    if not requested_tickers:
         return {}
     try:
         closes = fetch_daily_closes(
-            tickers,
+            requested_tickers,
             pd.Timestamp.today() - pd.Timedelta(days=7),
             pd.Timestamp.today(),
         )
         return {
             t: float(closes[t].dropna().iloc[-1])
-            for t in tickers
+            for t in requested_tickers
             if t in closes.columns and not closes[t].dropna().empty
         }
     except Exception as e:
