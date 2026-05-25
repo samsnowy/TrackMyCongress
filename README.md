@@ -1,6 +1,8 @@
 # TrackMyCongress
 
-Backtesting congressional stock trade disclosures (STOCK Act filings) for alpha signals. Includes a live paper trading strategy running on Alpaca.
+Congressional stock trading analysis, STOCK Act disclosure scraping, and backtesting for follow-disclosure alpha signals. TrackMyCongress analyzes House and Senate stock trade filings, compares congressional trades against SPY, studies options disclosures, and runs a live Alpaca paper trading strategy.
+
+Keywords: congressional stock trading, STOCK Act disclosures, Congress trades, political trading, stock trade backtesting, Alpaca paper trading, Quiver Quant, House PTR, Senate eFDS.
 
 ---
 

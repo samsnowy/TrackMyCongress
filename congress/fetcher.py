@@ -25,6 +25,7 @@ from datetime import datetime, timedelta
 _ENDPOINT   = "https://api.quiverquant.com/beta/live/congresstrading"
 _CACHE_FILE = "congress_trades.csv"
 _CACHE_TTL_HOURS = 12
+_MAX_STALE_CACHE_HOURS = 72
 
 _HEADERS = {
     "User-Agent": "TrackMyCongress/1.0 (research; public STOCK Act data)",
@@ -71,9 +72,9 @@ def fetch_trades(purchases_only: bool = False, sales_only: bool = False, force_r
         except (PermissionError, requests.RequestException) as e:
             if os.path.exists(_CACHE_FILE):
                 age_h = (datetime.now().timestamp() - os.path.getmtime(_CACHE_FILE)) / 3600
-                if age_h > 48:
+                if age_h > _MAX_STALE_CACHE_HOURS:
                     raise RuntimeError(
-                        f"Cache is {age_h:.0f}h old (>48h limit) and API is unavailable. "
+                        f"Cache is {age_h:.0f}h old (>{_MAX_STALE_CACHE_HOURS}h limit) and API is unavailable. "
                         f"Delete {_CACHE_FILE} or restore API access."
                     ) from e
                 age_str = f"{age_h:.0f}h old"

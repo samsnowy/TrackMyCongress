@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://samsnowy.github.io/TrackMyCongress/sitemap.xml

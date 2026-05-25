@@ -257,9 +257,15 @@ def run_live(dry_run: bool = False) -> None:
 
     # --- Detect stock signals (Quiver feed) ---
     print(f"\n--- Scanning for stock signals ---")
-    df         = fetch_trades(purchases_only=True)
-    raw_sigs   = detect_new_signals(df, seen, reliable_pols)
-    signals    = deduplicate_signals(raw_sigs)
+    raw_sigs = []
+    signals  = []
+    try:
+        df       = fetch_trades(purchases_only=True)
+        raw_sigs = detect_new_signals(df, seen, reliable_pols)
+        signals  = deduplicate_signals(raw_sigs)
+    except Exception as e:
+        print(f"  [WARN] stock feed unavailable: {e}")
+        print("         Skipping new stock entries; exits and existing state will still be processed.")
 
     if not raw_sigs:
         print("  No new stock signals.")
@@ -270,14 +276,23 @@ def run_live(dry_run: bool = False) -> None:
     print(f"\n--- Scanning for options signals ---")
     from congress.fetcher import fetch_options
     from congress.options_analysis import load_options
-    opts_df = fetch_options()   # live feed first (same 12h cache as stock signals)
-    source_label = "Quiver live"
-    if opts_df.empty and os.path.exists("congress_options.csv"):
+    try:
+        opts_df = fetch_options()   # live feed first (same 12h cache as stock signals)
+        source_label = "Quiver live"
+    except Exception as e:
+        print(f"  [WARN] options live feed unavailable: {e}")
+        opts_df = None
+        source_label = "unavailable"
+
+    if (opts_df is None or opts_df.empty) and os.path.exists("congress_options.csv"):
         # NOTE: scraped CSV uses a different column schema than the Quiver feed; detect_options_signals
         # expects Quiver-style columns (filing_date, transaction, option_type, strike, expiration,
         # amount_range). If the scraped CSV fallback ever diverges, signals will silently be empty.
         opts_df      = load_options(chamber="house")
         source_label = "scraped CSV fallback"
+    elif opts_df is None:
+        opts_df = load_options(chamber="house").iloc[0:0]
+
     print(f"  Options source: {source_label} ({len(opts_df)} rows)")
 
     opt_sigs = []
