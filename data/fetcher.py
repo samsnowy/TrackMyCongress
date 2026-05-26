@@ -119,9 +119,10 @@ def fetch_daily_closes(
     all_t = _clean_tickers(tickers)
     fetch_start = _normalize_date(start - timedelta(days=5))
     requested_end = _normalize_date(end + timedelta(days=end_buffer_days))
-    # yfinance's end date is exclusive. Cap at today so backtests do not
-    # repeatedly request future bars that cannot exist yet.
-    fetch_end = min(requested_end, _normalize_date(pd.Timestamp.today()))
+    # yfinance's end date is exclusive. Cap at tomorrow so a same-day refresh
+    # can include today's bar when it exists, without repeatedly asking for
+    # farther-future bars that cannot exist yet.
+    fetch_end = min(requested_end, _normalize_date(pd.Timestamp.today()) + timedelta(days=1))
 
     if not use_cache:
         return _download_daily_closes(all_t, fetch_start, fetch_end)
