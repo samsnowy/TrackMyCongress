@@ -530,6 +530,12 @@ def _read_portfolio_snapshot(live_positions: list | None = None) -> dict:
     from datetime import datetime
     from config import PARKING_TICKER
 
+    live_by_ticker = {
+        str(p.get("ticker", "")): p
+        for p in (live_positions or [])
+        if p.get("ticker")
+    }
+
     try:
         from broker.alpaca_paper import get_account, get_positions
         acct = get_account()
@@ -545,15 +551,22 @@ def _read_portfolio_snapshot(live_positions: list | None = None) -> dict:
             market_value = qty * current
             total_market_value += market_value
             total_unrealized += unrealized
+            ticker = p.get("ticker", "")
+            live_meta = live_by_ticker.get(str(ticker), {})
             positions.append({
-                "ticker":          p.get("ticker", ""),
+                "ticker":          ticker,
                 "qty":             qty,
                 "avg_entry":       round(avg_entry, 2),
                 "current_price":   round(current, 2),
                 "market_value":    round(market_value, 2),
                 "unrealized_pl":   round(unrealized, 2),
                 "unrealized_pct":  round((current / avg_entry - 1) * 100, 2) if avg_entry else 0,
-                "role":            "parking" if p.get("ticker") == PARKING_TICKER else "signal",
+                "role":            "parking" if ticker == PARKING_TICKER else "signal",
+                "entry_date":      live_meta.get("entry_date", ""),
+                "signal_date":     live_meta.get("signal_date", ""),
+                "planned_exit":    live_meta.get("planned_exit", ""),
+                "politicians":     live_meta.get("politicians", []),
+                "source":          live_meta.get("source", ""),
             })
 
         initial_equity = 1_000_000.0
@@ -584,6 +597,11 @@ def _read_portfolio_snapshot(live_positions: list | None = None) -> dict:
                 "unrealized_pl":   0,
                 "unrealized_pct":  0,
                 "role":            "parking" if p.get("ticker") == PARKING_TICKER else "signal",
+                "entry_date":      p.get("entry_date", ""),
+                "signal_date":     p.get("signal_date", ""),
+                "planned_exit":    p.get("planned_exit", ""),
+                "politicians":     p.get("politicians", []),
+                "source":          p.get("source", ""),
             })
         return {
             "source":             "strategy_state",

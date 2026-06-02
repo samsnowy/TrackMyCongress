@@ -304,46 +304,69 @@ const LIVE_POSITIONS = [
 
 const PORTFOLIO = {
   "source": "alpaca",
-  "as_of": "2026-06-02 08:48",
+  "as_of": "2026-06-02 08:56",
   "initial_equity": 1000000.0,
-  "equity": 1043456.95,
+  "equity": 1043555.94,
   "cash": 10072.0,
-  "buying_power": 1001775.27,
-  "portfolio_value": 1043456.95,
-  "total_pl": 43456.95,
-  "total_pl_pct": 4.35,
-  "unrealized_pl": 44885.65,
-  "market_value": 1033384.95,
+  "buying_power": 1001874.26,
+  "portfolio_value": 1043555.94,
+  "total_pl": 43555.94,
+  "total_pl_pct": 4.36,
+  "unrealized_pl": 44995.38,
+  "market_value": 1033494.68,
   "positions": [
     {
       "ticker": "IHG",
       "qty": 320.0,
       "avg_entry": 155.01,
-      "current_price": 158.83,
-      "market_value": 50825.63,
-      "unrealized_pl": 1222.43,
-      "unrealized_pct": 2.46,
-      "role": "signal"
+      "current_price": 158.76,
+      "market_value": 50803.23,
+      "unrealized_pl": 1200.03,
+      "unrealized_pct": 2.42,
+      "role": "signal",
+      "entry_date": "2026-05-20",
+      "signal_date": "2026-05-19",
+      "planned_exit": "2026-08-17",
+      "politicians": [
+        "Tim Moore"
+      ],
+      "source": "stock"
     },
     {
       "ticker": "LLY",
       "qty": 49.0,
       "avg_entry": 1008.94,
-      "current_price": 1068.52,
-      "market_value": 52357.48,
-      "unrealized_pl": 2919.42,
-      "unrealized_pct": 5.91,
-      "role": "signal"
+      "current_price": 1068.7,
+      "market_value": 52366.3,
+      "unrealized_pl": 2928.24,
+      "unrealized_pct": 5.92,
+      "role": "signal",
+      "entry_date": "2026-05-14",
+      "signal_date": "2026-05-13",
+      "planned_exit": "2026-08-11",
+      "politicians": [
+        "Byron Donalds",
+        "Byron Donalds"
+      ],
+      "source": "stock"
     },
     {
       "ticker": "MRVL",
       "qty": 274.0,
       "avg_entry": 182.0,
-      "current_price": 283.0,
-      "market_value": 77542.0,
-      "unrealized_pl": 27674.0,
-      "unrealized_pct": 55.49,
-      "role": "signal"
+      "current_price": 283.94,
+      "market_value": 77799.56,
+      "unrealized_pl": 27931.56,
+      "unrealized_pct": 56.01,
+      "role": "signal",
+      "entry_date": "2026-05-14",
+      "signal_date": "2026-05-13",
+      "planned_exit": "2026-08-11",
+      "politicians": [
+        "Byron Donalds",
+        "Byron Donalds"
+      ],
+      "source": "stock"
     },
     {
       "ticker": "RYCEY",
@@ -353,27 +376,46 @@ const PORTFOLIO = {
       "market_value": 51753.68,
       "unrealized_pl": 2066.76,
       "unrealized_pct": 4.16,
-      "role": "signal"
+      "role": "signal",
+      "entry_date": "2026-05-20",
+      "signal_date": "2026-05-19",
+      "planned_exit": "2026-08-17",
+      "politicians": [
+        "Tim Moore"
+      ],
+      "source": "stock"
     },
     {
       "ticker": "SPY",
       "qty": 990.0,
       "avg_entry": 747.76,
-      "current_price": 759.84,
-      "market_value": 752241.6,
-      "unrealized_pl": 11959.2,
-      "unrealized_pct": 1.62,
-      "role": "parking"
+      "current_price": 759.8,
+      "market_value": 752206.95,
+      "unrealized_pl": 11924.55,
+      "unrealized_pct": 1.61,
+      "role": "parking",
+      "entry_date": "",
+      "signal_date": "",
+      "planned_exit": "",
+      "politicians": [],
+      "source": ""
     },
     {
       "ticker": "T",
       "qty": 1992.0,
       "avg_entry": 24.91,
-      "current_price": 24.43,
-      "market_value": 48664.56,
-      "unrealized_pl": -956.16,
-      "unrealized_pct": -1.93,
-      "role": "signal"
+      "current_price": 24.38,
+      "market_value": 48564.96,
+      "unrealized_pl": -1055.76,
+      "unrealized_pct": -2.13,
+      "role": "signal",
+      "entry_date": "2026-05-20",
+      "signal_date": "2026-05-19",
+      "planned_exit": "2026-08-17",
+      "politicians": [
+        "Tim Moore"
+      ],
+      "source": "stock"
     }
   ]
 };

@@ -88,6 +88,17 @@ function signedPct(n) {
   return (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
 }
 
+function politicianLabel(p) {
+  var names = Array.isArray(p.politicians) ? p.politicians.filter(Boolean) : [];
+  var unique = [];
+  names.forEach(function(name) {
+    if (unique.indexOf(name) === -1) unique.push(name);
+  });
+  if (!unique.length) return '-';
+  if (unique.length <= 2) return unique.join(', ');
+  return unique[0] + ' +' + (unique.length - 1) + ' others';
+}
+
 var PAGE_SIZE = 20;
 var _currentRows = FILINGS;
 var _currentPage = 0;
@@ -191,17 +202,17 @@ renderFilings(FILINGS);
   });
 
   if (!positions.length) {
-    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-5 text-center" style="color:#64748b">No open paper positions available.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-5 text-center" style="color:#64748b">No open paper positions available.</td></tr>';
     return;
   }
   tbody.innerHTML = positions.map(function(p, i) {
     var rowBg = i % 2 === 0 ? '' : 'style="background:#0f172a40"';
-    var role = p.role === 'parking' ? 'SPY parking' : 'Signal';
     var pl = Number(p.unrealized_pl || 0);
     var plColor = pl >= 0 ? '#34d399' : '#f87171';
     return '<tr ' + rowBg + '>'
       + '<td class="px-4 py-2.5 font-mono font-bold" style="color:#f1f5f9">' + esc(p.ticker) + '</td>'
-      + '<td class="px-4 py-2.5" style="color:#cbd5e1">' + esc(role) + '</td>'
+      + '<td class="px-4 py-2.5 font-mono text-xs" style="color:#94a3b8;white-space:nowrap">' + esc(p.entry_date || '-') + '</td>'
+      + '<td class="px-4 py-2.5" style="color:#cbd5e1;white-space:nowrap">' + esc(politicianLabel(p)) + '</td>'
       + '<td class="px-4 py-2.5 text-right font-mono" style="color:#cbd5e1">' + Number(p.qty || 0).toLocaleString() + '</td>'
       + '<td class="px-4 py-2.5 text-right font-mono" style="color:#cbd5e1">$' + Number(p.avg_entry || 0).toFixed(2) + '</td>'
       + '<td class="px-4 py-2.5 text-right font-mono" style="color:#cbd5e1">$' + Number(p.current_price || 0).toFixed(2) + '</td>'
