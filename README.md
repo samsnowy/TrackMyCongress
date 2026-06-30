@@ -2,7 +2,7 @@
 
 Congressional stock trading analysis, STOCK Act disclosure scraping, and backtesting for follow-disclosure alpha signals. TrackMyCongress analyzes House and Senate stock trade filings, compares congressional trades against SPY, studies options disclosures, and runs a live Alpaca paper trading strategy.
 
-Keywords: congressional stock trading, STOCK Act disclosures, Congress trades, political trading, stock trade backtesting, Alpaca paper trading, Quiver Quant, House PTR, Senate eFDS.
+Keywords: congressional stock trading, STOCK Act disclosures, Congress trades, political trading, stock trade backtesting, Alpaca paper trading, House PTR, Senate eFDS.
 
 ---
 
@@ -88,8 +88,8 @@ Two signal types, one execution path. State persisted in `strategy_state.json`. 
 
 | Signal | Source | Filter | Hold |
 |--------|--------|--------|------|
-| Stock purchase | Quiver live feed (7-day lookback) | 12 reliable politicians (avg excess >2% + >=20 trades) | 90 days |
-| Deep ITM call | Quiver `TickerType==OP` (30-day lookback) | Gottheimer / Pelosi / Ross / Bresnahan + `strike/price < 0.85` | 30 days |
+| Stock purchase | Official scraped House/Senate CSVs (7-day lookback) | 12 reliable politicians (avg excess >2% + >=20 trades) | 90 days |
+| Deep ITM call | Official scraped options CSVs (30-day lookback) | Gottheimer / Pelosi / Ross / Bresnahan + `strike/price < 0.85` | 30 days |
 
 **Sizing:** 5% of equity per position, max 15 simultaneous positions.
 Idle cash is parked in SPY with a 1% cash buffer; signal entries sell SPY as needed before buying.
@@ -111,11 +111,10 @@ cp .env.example .env
 Requires **Python 3.10+**.
 
 **Data sources:**
-- [Quiver Quant API](https://www.quiverquant.com/) — congressional trade live feed; the live strategy uses their free public endpoint (no API key required). If the endpoint is rate-limited or restricted, a local cache (`congress_trades.csv`) is used as fallback.
-- [Alpaca](https://alpaca.markets/) — paper trading account (free, requires API keys in `.env`)
+- Official House and Senate disclosure scrapers pull directly from public government sources and do not require API keys.
+- [Alpaca](https://alpaca.markets/) - paper trading account (free, requires API keys in `.env`)
 - Optional executive branch OGE disclosures via `executive_trades.csv`; these are display-only and are not used for backtests or live strategy signals.
-
-The scrapers (`congress/scraper.py`, `congress/senate_scraper.py`) pull directly from public government sources and don't require API keys.
+- Quiver Quant support remains in `congress/fetcher.py` for legacy exploratory commands/cache reads, but the live strategy no longer requires Quiver access or a Quiver token.
 
 ---
 
@@ -123,7 +122,7 @@ The scrapers (`congress/scraper.py`, `congress/senate_scraper.py`) pull directly
 
 ```bash
 # Research
-python main.py congress                 # latest trades from Quiver Quant live feed
+python main.py congress                 # legacy Quiver cache/API view (not required for live strategy)
 python main.py followcongress           # follow-disclosure backtest (configurable hold periods)
 python main.py paircongress             # buy/sell pair analysis — sell-lag drift
 python main.py congressoptions          # options analysis
@@ -158,7 +157,7 @@ congress/
   senate_scraper.py   — Senate PTR scraper (efdsearch.senate.gov, HTML + CSRF session)
   scrape_all.py       — runs both scrapers in sequence (resumable)
   loader.py           — unified data loader; normalises scraped CSVs for backtest
-  fetcher.py          — Quiver Quant API client (live feed, cached); parses options rows
+  fetcher.py          - legacy Quiver Quant API/cache helper; not required for live strategy
   backtest.py         — follow-disclosure backtest engine (yfinance daily prices)
   trade_pairs.py      — buy/sell pair matching + sell-lag drift analysis
   options_analysis.py — options overview, straddle analysis, House call backtest
@@ -186,7 +185,7 @@ Scraped from public government sources:
 | House PTRs | disclosures-clerk.house.gov | PDF | 2022–present |
 | Senate eFDS | efdsearch.senate.gov | HTML/JSON | 2022–present |
 
-Quiver Quant API provides a pre-parsed live feed (~10 months rolling) used for the live strategy.
+The live strategy uses the scraped House/Senate CSVs produced by `python -m congress.scrape_all`; Quiver access is not required.
 
 yfinance daily closes are cached locally in `price_cache/daily_closes.csv`; consecutive backtest runs only fetch missing dates or newly requested tickers. Delisted/bad symbols are remembered in `price_cache/failed_tickers.json` and skipped on later runs.
 
@@ -199,6 +198,6 @@ yfinance daily closes are cached locally in `price_cache/daily_closes.csv`; cons
 - **Disclosure lag:** The backtest entry is the close on the day a trade is publicly filed — 30–45 days after the actual transaction. Real-time edge (if any) is unknowable from this data.
 - **Backtesting assumptions:** Results assume buying at the closing price on filing day with no slippage or liquidity constraints. In practice, some tickers are illiquid and execution costs will reduce returns.
 - **Sample size:** Top individual performers (Sullivan, Moore) have 9–41 trades each. High excess returns may reflect a specific time period or sector concentration rather than a persistent edge. The dataset covers 2022–2026 — a strong bull market for US equities.
-- **Data accuracy:** Congressional disclosures are self-reported with known errors and omissions. Quiver Quant (used for the live feed) notes their data "may be inaccurate or incomplete." Options strike/expiry data is parsed from free-text `Description` fields and can misparse.
+- **Data accuracy:** Congressional disclosures are self-reported with known errors and omissions. Options strike/expiry data is parsed from free-text disclosure text and can misparse.
 - **Past performance:** The backtest covers one market regime. Excess returns vs SPY may not persist in different rate or volatility environments.
 - **Not financial advice.** This is a research and education project. Congressional disclosure patterns are one input signal, not a trading strategy guarantee. Do your own analysis before making any investment decisions.

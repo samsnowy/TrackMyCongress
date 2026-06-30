@@ -213,7 +213,7 @@ Audited all 41 House call purchases with known strike data against stock price o
 
 ### Options Data Source
 
-The Quiver Quant live feed (`congress_trades.csv`) includes options rows via `TickerType == "OP"`. The `Description` field contains `"CALL OPTIONS; STRIKE PRICE $X; EXPIRES MM/DD/YYYY"`. No separate scraping needed for live detection — `fetch_options()` in `fetcher.py` parses these rows automatically.
+Live options detection uses the official scraped options CSVs (`congress_options.csv` and `senate_options.csv`). The Quiver cache path in `fetcher.py` is retained for legacy exploratory commands, but Quiver access is no longer required for live detection.
 
 Exercise events are absent from all data sources — they do not appear as stock purchases and create no false signals.
 
@@ -322,8 +322,8 @@ The live strategy checks whether a call is deep-ITM against the *current* stock 
 
 ### Code / Operational
 
-**401 falls silently to stale cache (fetcher.py)**
-If the Quiver API returns 401 (key expired, plan downgraded) and `congress_trades.csv` is under 48 hours old, the error is suppressed and stale data is served with only a `[WARN]` log line. The live strategy continues on outdated signals. Check the log output after each run for the `[fetch]` vs `[cache]` line.
+**Legacy Quiver cache staleness (fetcher.py)**
+`main.py congress` and other legacy Quiver helpers can still serve `congress_trades.csv` when the API is unavailable. The live strategy no longer depends on this cache; it reads the scraped official CSVs produced by `python -m congress.scrape_all`.
 
 **Phantom positions on broker failure (live.py)**
 If Alpaca is unreachable in live (non-dry-run) mode, `_place_order` is `None`, the order block is skipped, but the position is still appended to `strategy_state.json` with `order_id = "dry-run"`. The state will show an open position that Alpaca doesn't hold. Guard: always run `python main.py account` first to confirm Alpaca connectivity before a live run.

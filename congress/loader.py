@@ -69,6 +69,9 @@ def load_for_backtest(chamber: str = "both", purchases_only: bool = False) -> pd
         "transaction":      "Transaction",
     })
 
+    if "amount_range" in df.columns:
+        df["Range"] = df["amount_range"]
+
     df["Party"] = "?"
 
     if purchases_only:

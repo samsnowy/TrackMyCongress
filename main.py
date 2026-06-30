@@ -1,7 +1,7 @@
 """
 Entry point for the congress trades research tool.
 
-  python main.py congress            — latest congress trades via Quiver Quant API
+  python main.py congress            — legacy Quiver cache/API view
   python main.py followcongress      — backtest following politicians' disclosures
   python main.py paircongress        — match buy/sell pairs, analyse sell-lag drift
   python main.py congressoptions     — options overview, Tuberville straddles, House calls
@@ -21,7 +21,7 @@ def cmd_congress():
         disclosure_lag_stats, trades_for_politician, print_recent,
     )
 
-    print("Fetching latest congress trades from Quiver Quant (free)...")
+    print("Fetching congress trades from legacy Quiver cache/API...")
     df = fetch_trades()
     print(f"  {len(df)} trades loaded | {df['ReportDate'].min().date()} to {df['ReportDate'].max().date()}")
 
@@ -328,19 +328,37 @@ def _write_data_js(sensitivity: list, generated: str, reliable_count: int, polit
     import pandas as pd
     from congress.strategy import match_politician
 
-    # Last 90 days of filings — all rows, no per-politician cap
+    # Last 90 days of filings - all rows, no per-politician cap
     recent_filings_days = 90
     filings = []
-    if os.path.exists("congress_trades.csv") and os.path.exists("congress_rankings.csv"):
-        df_t = pd.read_csv("congress_trades.csv")
+    if os.path.exists("congress_rankings.csv"):
+        df_r = pd.read_csv("congress_rankings.csv")
+        from config import RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES
+        from congress.strategy import KNOWN_OPTIONS_POLITICIANS, _matches_options_politician
+        from congress.loader import load_for_backtest
+        from congress.options_analysis import load_options
+
+        stocks = load_for_backtest(purchases_only=False)
+        stocks["TickerType"] = "ST"
+
+        options = load_options(chamber="both").rename(columns={
+            "name":             "Representative",
+            "filing_date":      "ReportDate",
+            "transaction_date": "TransactionDate",
+            "ticker":           "Ticker",
+            "transaction":      "Transaction",
+            "amount_range":     "Range",
+        })
+        options["TickerType"] = "OP"
+        options["Party"] = ""
+
+        cols = ["ReportDate", "TransactionDate", "Representative", "Ticker", "Transaction", "Range", "TickerType", "Party"]
+        df_t = pd.concat([stocks.reindex(columns=cols), options.reindex(columns=cols)], ignore_index=True)
         df_t["ReportDate"] = pd.to_datetime(df_t["ReportDate"], errors="coerce")
         df_t = df_t.dropna(subset=["ReportDate", "Ticker", "Representative"])
         cutoff = pd.Timestamp.today() - pd.Timedelta(days=recent_filings_days)
         df_t = df_t[df_t["ReportDate"] >= cutoff].sort_values("ReportDate", ascending=False)
 
-        df_r = pd.read_csv("congress_rankings.csv")
-        from config import RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES
-        from congress.strategy import KNOWN_OPTIONS_POLITICIANS, _matches_options_politician
         reliable_pols = {r["politician"]: {} for _, r in df_r[(df_r["avg_excess"] > RELIABLE_MIN_EXCESS) & (df_r["trades"] >= RELIABLE_MIN_TRADES)].iterrows()}
         hc_pols = {}
         if os.path.exists("congress_rankings_hc.csv"):

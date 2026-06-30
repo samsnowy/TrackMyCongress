@@ -18,7 +18,7 @@ Find exploitable patterns in congressional stock trade disclosures. Three hypoth
 | `congress_options.csv` | 156 trades, 9 reps | Complete (House, deduplicated) |
 | `senate_historical.csv` | ~4,000 stock trades | Complete (Senate, 2022–2026) |
 | `senate_options.csv` | 306 trades | Complete (Senate) |
-| `congress_trades.csv` | ~1,000 trades | Quiver API cache (separate, live) |
+| `congress_trades.csv` | ~1,000 trades | Legacy Quiver API cache (optional, not used by live strategy) |
 | `congress_rankings.csv` | 12 politicians | Generated from 90d backtest (excess >2%, ≥20 trades) — all-trades |
 | `congress_rankings_hc.csv` | 4 politicians | HC backtest (>$15k trades, excess >2%, ≥20 HC trades) — live strategy |
 
@@ -77,8 +77,8 @@ Done. Running on Alpaca paper account ($1,000,000 simulated equity).
 
 | Signal | Source | Filter | Hold |
 |---|---|---|---|
-| Stock purchase | Quiver live feed (7d lookback) | HC group (4 pols, >$15k trades, avg excess >2% + ≥20 HC trades) | 90 days |
-| Deep ITM call | Quiver `TickerType==OP` (30d lookback) | Gottheimer / Pelosi / Ross / Bresnahan + strike/price < 0.85 | 30 days |
+| Stock purchase | Official scraped House/Senate CSVs (7d lookback) | HC group (4 pols, >$15k trades, avg excess >2% + ≥20 HC trades) | 90 days |
+| Deep ITM call | Official scraped options CSVs (30d lookback) | Gottheimer / Pelosi / Ross / Bresnahan + strike/price < 0.85 | 30 days |
 
 **Sizing:** 5% of equity per position, max 15 simultaneous positions.  
 **State:** `strategy_state.json` — open positions, closed positions, seen signal keys.  

@@ -136,13 +136,52 @@ def _parse_ptr_pdf(pdf_bytes: bytes, filing_meta: dict) -> tuple[list[dict], lis
 
         pending_option: dict | None = None
 
+        def parse_collapsed_row(text: str) -> dict | None:
+            text = text.replace("\n", " ").strip()
+            m = re.search(
+                r"^(?P<owner>\S+)\s+"
+                r"(?P<company>.*?)\s+"
+                r"(?P<tx>P|S|S \(partial\)|E)\s+"
+                r"(?P<tx_date>\d{2}/\d{2}/\d{4})\s+"
+                r"(?P<notif_date>\d{2}/\d{2}/\d{4})\s+"
+                r"(?P<amount_start>\$[\d,]+)\s*-\s*"
+                r"\((?P<ticker>[A-Z]{1,5}(?:\.[A-Z])?)\)\s*\[(?P<asset_code>ST|OP)\]\s*"
+                r"(?P<amount_end>\$[\d,]+)"
+                r"(?P<footnote>.*)$",
+                text,
+            )
+            if not m:
+                return None
+
+            details = _parse_option_details(m.group("footnote"))
+            return {
+                "name":              filing_meta["name"],
+                "state_dst":         filing_meta["state_dst"],
+                "doc_id":            filing_meta["doc_id"],
+                "filing_date":       filing_meta["filing_date"],
+                "owner":             m.group("owner"),
+                "company":           m.group("company").strip(),
+                "ticker":            m.group("ticker"),
+                "transaction":       TRANSACTION_MAP.get(m.group("tx"), m.group("tx")),
+                "transaction_date":  m.group("tx_date"),
+                "notification_date": m.group("notif_date"),
+                "amount_range":      f"{m.group('amount_start')} - {m.group('amount_end')}",
+                "asset_code":        m.group("asset_code"),
+                "option_type":       details["option_type"],
+                "contracts":         details["contracts"],
+                "strike":            details["strike"],
+                "expiration":        details["expiration"],
+                "footnote":          text,
+            }
+
         for clean in all_rows:
             date_col = clean[4] if len(clean) > 4 else ""
             has_date = bool(re.match(r"\d{2}/\d{2}/\d{4}", date_col))
+            collapsed = parse_collapsed_row(clean[0]) if clean and clean[0] else None
 
             # Accumulate footnote rows for a pending option
             if pending_option is not None:
-                if has_date:
+                if has_date or collapsed is not None:
                     # New transaction row — flush pending option first
                     options.append(pending_option)
                     pending_option = None
@@ -157,6 +196,19 @@ def _parse_ptr_pdf(pdf_bytes: bytes, filing_meta: dict) -> tuple[list[dict], lis
                         if details["option_type"] or details["strike"] or details["expiration"]:
                             pending_option.update(details)
                     continue
+
+            if collapsed is not None:
+                asset_code = collapsed.pop("asset_code")
+                if asset_code == "ST":
+                    collapsed.pop("option_type", None)
+                    collapsed.pop("contracts", None)
+                    collapsed.pop("strike", None)
+                    collapsed.pop("expiration", None)
+                    collapsed.pop("footnote", None)
+                    stocks.append(collapsed)
+                else:
+                    options.append(collapsed)
+                continue
 
             if len(clean) < 6 or not has_date:
                 continue
@@ -260,7 +312,10 @@ def scrape_all(
             print(f"  ERROR fetching index: {e}")
             continue
 
-        filings.sort(key=lambda f: f.get("filing_date", ""), reverse=True)
+        filings.sort(
+            key=lambda f: pd.to_datetime(f.get("filing_date", ""), errors="coerce"),
+            reverse=True,
+        )
         print(f"  {len(filings)} PTR filings found")
         if max_per_year:
             filings = filings[:max_per_year]

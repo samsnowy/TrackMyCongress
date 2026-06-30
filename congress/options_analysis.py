@@ -38,7 +38,7 @@ def load_options(chamber: str = "both") -> pd.DataFrame:
     combined = pd.concat(frames, ignore_index=True)
     combined["filing_date"]      = pd.to_datetime(combined["filing_date"], errors="coerce")
     combined["transaction_date"] = pd.to_datetime(combined["transaction_date"], format="%m/%d/%Y", errors="coerce")
-    combined["expiration"]       = pd.to_datetime(combined["expiration"], errors="coerce")
+    combined["expiration"]       = pd.to_datetime(combined["expiration"], format="mixed", errors="coerce")
     return combined
 
 
