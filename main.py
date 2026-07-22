@@ -516,7 +516,12 @@ def _read_highconv() -> dict:
 
 
 def _read_live_positions() -> list:
-    """Read open live-strategy positions from strategy_state.json for the site."""
+    """Read strategy metadata used to annotate broker positions on the site.
+
+    Pending entries are included because an Alpaca order can fill in the few seconds
+    after the live runner's final status check. The portfolio itself still comes from
+    Alpaca, so an unfilled pending order cannot create a row on the site.
+    """
     import json, os
     path = "strategy_state.json"
     if not os.path.exists(path):
@@ -527,9 +532,17 @@ def _read_live_positions() -> list:
     except Exception:
         return []
 
-    positions = []
-    for pos in state.get("open_positions", []):
-        positions.append({
+    positions_by_ticker = {}
+    state_positions = [
+        (pos, "open") for pos in state.get("open_positions", [])
+    ] + [
+        (pos, "pending") for pos in state.get("pending_entries", [])
+    ]
+    for pos, lifecycle in state_positions:
+        ticker = pos.get("ticker", "")
+        if not ticker or ticker in positions_by_ticker:
+            continue
+        positions_by_ticker[ticker] = {
             "ticker":       pos.get("ticker", ""),
             "source":       pos.get("source", "stock"),
             "qty":          pos.get("qty", 0),
@@ -539,8 +552,9 @@ def _read_live_positions() -> list:
             "entry_price":  round(float(pos.get("entry_price") or 0), 2),
             "order_id":     pos.get("order_id", ""),
             "politicians":  pos.get("politicians", []),
-        })
-    return positions
+            "lifecycle":    lifecycle,
+        }
+    return list(positions_by_ticker.values())
 
 
 def _read_portfolio_snapshot(live_positions: list | None = None) -> dict:

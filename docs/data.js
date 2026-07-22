@@ -245,7 +245,8 @@ const LIVE_POSITIONS = [
     "politicians": [
       "Byron Donalds",
       "Byron Donalds"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "LLY",
@@ -259,7 +260,8 @@ const LIVE_POSITIONS = [
     "politicians": [
       "Byron Donalds",
       "Byron Donalds"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "T",
@@ -272,7 +274,8 @@ const LIVE_POSITIONS = [
     "order_id": "9a824460-5f1a-48ae-b6b6-da3ae39472c1",
     "politicians": [
       "Tim Moore"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "IHG",
@@ -285,7 +288,8 @@ const LIVE_POSITIONS = [
     "order_id": "a386f83b-d524-40bb-b021-60ea99026ab6",
     "politicians": [
       "Tim Moore"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "RYCEY",
@@ -298,7 +302,8 @@ const LIVE_POSITIONS = [
     "order_id": "1f288cae-1e73-46b3-ba11-e43dd9f6423e",
     "politicians": [
       "Tim Moore"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "AAPL",
@@ -311,7 +316,8 @@ const LIVE_POSITIONS = [
     "order_id": "752717ae-f488-4136-8e06-6da4558ee050",
     "politicians": [
       "Cleo Fields"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "QNT",
@@ -324,7 +330,8 @@ const LIVE_POSITIONS = [
     "order_id": "e20c8cf8-d551-4595-b48d-15e777d73f37",
     "politicians": [
       "Cleo Fields"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "UBER",
@@ -337,7 +344,8 @@ const LIVE_POSITIONS = [
     "order_id": "b8a21aab-8397-4c68-95ac-4b14d89ab4d5",
     "politicians": [
       "Nancy Pelosi"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "INTC",
@@ -350,7 +358,8 @@ const LIVE_POSITIONS = [
     "order_id": "2b3d1a62-a1fa-4c42-b145-1a6a36d15d7b",
     "politicians": [
       "Nancy Pelosi"
-    ]
+    ],
+    "lifecycle": "open"
   },
   {
     "ticker": "APH",
@@ -363,31 +372,46 @@ const LIVE_POSITIONS = [
     "order_id": "955b9139-eb7f-4221-8c3a-29bd66b1a601",
     "politicians": [
       "Rick Larsen"
-    ]
+    ],
+    "lifecycle": "open"
+  },
+  {
+    "ticker": "NVDA",
+    "source": "stock",
+    "qty": 231,
+    "entry_date": "2026-07-22",
+    "signal_date": "2026-07-16",
+    "planned_exit": "2026-10-14",
+    "entry_price": 213.51,
+    "order_id": "f05bd17a-c06a-4f42-a7a8-8bfea760ce6b",
+    "politicians": [
+      "Cleo Fields"
+    ],
+    "lifecycle": "pending"
   }
 ];
 
 const PORTFOLIO = {
   "source": "alpaca",
-  "as_of": "2026-07-22 12:19",
+  "as_of": "2026-07-22 12:25",
   "initial_equity": 1000000.0,
-  "equity": 987494.65,
+  "equity": 987564.72,
   "cash": 10403.37,
-  "buying_power": 2617790.68,
-  "portfolio_value": 987494.65,
-  "total_pl": -12505.35,
-  "total_pl_pct": -1.25,
-  "unrealized_pl": -7716.47,
-  "market_value": 977069.49,
+  "buying_power": 2617868.25,
+  "portfolio_value": 987564.72,
+  "total_pl": -12435.28,
+  "total_pl_pct": -1.24,
+  "unrealized_pl": -7628.21,
+  "market_value": 977157.74,
   "positions": [
     {
       "ticker": "AAPL",
       "qty": 165.0,
       "avg_entry": 313.04,
-      "current_price": 324.38,
-      "market_value": 53522.7,
-      "unrealized_pl": 1871.1,
-      "unrealized_pct": 3.62,
+      "current_price": 324.42,
+      "market_value": 53528.48,
+      "unrealized_pl": 1876.88,
+      "unrealized_pct": 3.63,
       "role": "signal",
       "entry_date": "2026-06-05",
       "signal_date": "2026-06-03",
@@ -401,10 +425,10 @@ const PORTFOLIO = {
       "ticker": "APH",
       "qty": 320.0,
       "avg_entry": 153.47,
-      "current_price": 157.78,
-      "market_value": 50491.2,
-      "unrealized_pl": 1380.8,
-      "unrealized_pct": 2.81,
+      "current_price": 157.73,
+      "market_value": 50473.6,
+      "unrealized_pl": 1363.2,
+      "unrealized_pct": 2.78,
       "role": "signal",
       "entry_date": "2026-07-16",
       "signal_date": "2026-07-12",
@@ -418,10 +442,10 @@ const PORTFOLIO = {
       "ticker": "IHG",
       "qty": 320.0,
       "avg_entry": 155.01,
-      "current_price": 155.78,
-      "market_value": 49849.6,
-      "unrealized_pl": 246.4,
-      "unrealized_pct": 0.5,
+      "current_price": 155.74,
+      "market_value": 49836.8,
+      "unrealized_pl": 233.6,
+      "unrealized_pct": 0.47,
       "role": "signal",
       "entry_date": "2026-05-20",
       "signal_date": "2026-05-19",
@@ -435,10 +459,10 @@ const PORTFOLIO = {
       "ticker": "INTC",
       "qty": 367.0,
       "avg_entry": 140.54,
-      "current_price": 104.64,
-      "market_value": 38402.88,
-      "unrealized_pl": -13175.3,
-      "unrealized_pct": -25.54,
+      "current_price": 104.5,
+      "market_value": 38353.33,
+      "unrealized_pl": -13224.84,
+      "unrealized_pct": -25.64,
       "role": "signal",
       "entry_date": "2026-06-30",
       "signal_date": "2026-06-23",
@@ -452,10 +476,10 @@ const PORTFOLIO = {
       "ticker": "LLY",
       "qty": 49.0,
       "avg_entry": 1008.94,
-      "current_price": 1157.16,
-      "market_value": 56700.84,
-      "unrealized_pl": 7262.78,
-      "unrealized_pct": 14.69,
+      "current_price": 1155.26,
+      "market_value": 56607.5,
+      "unrealized_pl": 7169.44,
+      "unrealized_pct": 14.5,
       "role": "signal",
       "entry_date": "2026-05-14",
       "signal_date": "2026-05-13",
@@ -470,10 +494,10 @@ const PORTFOLIO = {
       "ticker": "MRVL",
       "qty": 274.0,
       "avg_entry": 182.0,
-      "current_price": 212.25,
-      "market_value": 58156.5,
-      "unrealized_pl": 8288.5,
-      "unrealized_pct": 16.62,
+      "current_price": 212.47,
+      "market_value": 58216.78,
+      "unrealized_pl": 8348.78,
+      "unrealized_pct": 16.74,
       "role": "signal",
       "entry_date": "2026-05-14",
       "signal_date": "2026-05-13",
@@ -488,25 +512,27 @@ const PORTFOLIO = {
       "ticker": "NVDA",
       "qty": 231.0,
       "avg_entry": 213.49,
-      "current_price": 213.32,
-      "market_value": 49278.07,
-      "unrealized_pl": -38.57,
+      "current_price": 213.33,
+      "market_value": 49279.23,
+      "unrealized_pl": -37.41,
       "unrealized_pct": -0.08,
       "role": "signal",
-      "entry_date": "",
-      "signal_date": "",
-      "planned_exit": "",
-      "politicians": [],
-      "source": ""
+      "entry_date": "2026-07-22",
+      "signal_date": "2026-07-16",
+      "planned_exit": "2026-10-14",
+      "politicians": [
+        "Cleo Fields"
+      ],
+      "source": "stock"
     },
     {
       "ticker": "QNT",
       "qty": 661.0,
       "avg_entry": 78.23,
-      "current_price": 54.85,
-      "market_value": 36258.89,
-      "unrealized_pl": -15451.14,
-      "unrealized_pct": -29.88,
+      "current_price": 55.28,
+      "market_value": 36540.08,
+      "unrealized_pl": -15169.95,
+      "unrealized_pct": -29.34,
       "role": "signal",
       "entry_date": "2026-06-30",
       "signal_date": "2026-06-26",
@@ -520,10 +546,10 @@ const PORTFOLIO = {
       "ticker": "RYCEY",
       "qty": 3026.0,
       "avg_entry": 16.42,
-      "current_price": 18.85,
-      "market_value": 57028.0,
-      "unrealized_pl": 7341.08,
-      "unrealized_pct": 14.77,
+      "current_price": 18.86,
+      "market_value": 57070.36,
+      "unrealized_pl": 7383.44,
+      "unrealized_pct": 14.86,
       "role": "signal",
       "entry_date": "2026-05-20",
       "signal_date": "2026-05-19",
@@ -537,10 +563,10 @@ const PORTFOLIO = {
       "ticker": "SPY",
       "qty": 577.0,
       "avg_entry": 747.91,
-      "current_price": 748.17,
-      "market_value": 431694.09,
-      "unrealized_pl": 151.28,
-      "unrealized_pct": 0.04,
+      "current_price": 747.87,
+      "market_value": 431520.99,
+      "unrealized_pl": -21.82,
+      "unrealized_pct": -0.01,
       "role": "parking",
       "entry_date": "",
       "signal_date": "",
@@ -552,10 +578,10 @@ const PORTFOLIO = {
       "ticker": "T",
       "qty": 1992.0,
       "avg_entry": 24.91,
-      "current_price": 22.79,
-      "market_value": 45387.72,
-      "unrealized_pl": -4233.0,
-      "unrealized_pct": -8.53,
+      "current_price": 22.82,
+      "market_value": 45467.4,
+      "unrealized_pl": -4153.32,
+      "unrealized_pct": -8.37,
       "role": "signal",
       "entry_date": "2026-05-20",
       "signal_date": "2026-05-19",
@@ -569,10 +595,10 @@ const PORTFOLIO = {
       "ticker": "UBER",
       "qty": 716.0,
       "avg_entry": 72.15,
-      "current_price": 70.25,
-      "market_value": 50299.0,
-      "unrealized_pl": -1360.4,
-      "unrealized_pct": -2.63,
+      "current_price": 70.2,
+      "market_value": 50263.2,
+      "unrealized_pl": -1396.2,
+      "unrealized_pct": -2.7,
       "role": "signal",
       "entry_date": "2026-06-30",
       "signal_date": "2026-06-23",
