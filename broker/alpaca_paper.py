@@ -47,6 +47,24 @@ def get_positions() -> list[dict]:
     ]
 
 
+def get_order(order_id: str) -> dict:
+    """Return the fill lifecycle fields needed to reconcile strategy state."""
+    order = get_client().get_order_by_id(order_id)
+    status = getattr(order.status, "value", str(order.status)).lower()
+    return {
+        "id": str(order.id),
+        "ticker": order.symbol,
+        "status": status,
+        "qty": float(order.qty or 0),
+        "filled_qty": float(order.filled_qty or 0),
+        "filled_avg_price": (
+            float(order.filled_avg_price) if order.filled_avg_price is not None else None
+        ),
+        "submitted_at": str(order.submitted_at) if order.submitted_at else "",
+        "filled_at": str(order.filled_at) if order.filled_at else "",
+    }
+
+
 def place_market_order(ticker: str, side: str, qty: int) -> dict:
     """Place a market order. side = 'buy' or 'sell'."""
     client = get_client()

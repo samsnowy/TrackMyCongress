@@ -48,13 +48,16 @@ STATE_FILE = "strategy_state.json"
 
 def _load_state() -> dict:
     if not os.path.exists(STATE_FILE):
-        return {"open_positions": [], "closed_positions": [], "seen_signals": []}
+        return {"open_positions": [], "pending_entries": [], "closed_positions": [], "seen_signals": []}
     try:
         with open(STATE_FILE) as f:
             state = json.load(f)
         for key in ("open_positions", "closed_positions", "seen_signals"):
             if not isinstance(state.get(key), list):
                 raise ValueError(f"key '{key}' missing or not a list")
+        state.setdefault("pending_entries", [])
+        if not isinstance(state["pending_entries"], list):
+            raise ValueError("key 'pending_entries' is not a list")
         return state
     except (json.JSONDecodeError, ValueError) as e:
         print(f"  [error] {STATE_FILE} is malformed: {e}")
@@ -85,6 +88,71 @@ def _position_qty(positions: list[dict], ticker: str) -> float:
         if pos.get("ticker") == ticker:
             return float(pos.get("qty", 0))
     return 0.0
+
+
+def _position_signal_keys(pos: dict) -> set[str]:
+    """Get stored keys, with a fallback for positions created before keys were persisted."""
+    keys = pos.get("signal_keys")
+    if keys:
+        return set(keys)
+    ticker = pos.get("ticker", "")
+    report_date = pos.get("signal_date", "")
+    politicians = pos.get("politicians", [])
+    return {f"{ticker}_{report_date}_{name}" for name in politicians if ticker and report_date}
+
+
+def _reconcile_entries(
+    open_positions: list[dict],
+    pending_entries: list[dict],
+    seen: set[str],
+    live_tickers: set[str],
+    get_order,
+) -> tuple[list[dict], list[dict]]:
+    """Promote fills and make zero-fill terminal orders retryable."""
+    terminal_failures = {"rejected", "canceled", "expired"}
+    reconciled_open = []
+    reconciled_pending = []
+
+    # Legacy versions recorded submitted orders as open before they filled.
+    candidates = [(pos, False) for pos in open_positions] + [
+        (pos, True) for pos in pending_entries
+    ]
+    for pos, was_pending in candidates:
+        ticker = pos.get("ticker", "")
+        if ticker in live_tickers and not was_pending:
+            reconciled_open.append(pos)
+            continue
+
+        order_id = pos.get("order_id")
+        if not order_id or order_id == "dry-run":
+            print(f"  [WARN] state has {ticker} but Alpaca does not; no valid order to reconcile")
+            reconciled_open.append(pos)
+            continue
+
+        try:
+            order = get_order(order_id)
+        except Exception as e:
+            print(f"  [WARN] could not reconcile {ticker} order {order_id}: {e}")
+            (reconciled_pending if was_pending else reconciled_open).append(pos)
+            continue
+
+        status = order.get("status", "").lower()
+        filled_qty = float(order.get("filled_qty") or 0)
+        if status in terminal_failures and filled_qty == 0:
+            seen.difference_update(_position_signal_keys(pos))
+            print(f"  RETRY {ticker:<6} previous order {status}; removed phantom position")
+        elif status == "filled" or filled_qty > 0:
+            pos["qty"] = filled_qty
+            if order.get("filled_avg_price"):
+                pos["entry_price"] = order["filled_avg_price"]
+            if order.get("filled_at"):
+                pos["entry_date"] = str(order["filled_at"])[:10]
+            reconciled_open.append(pos)
+        else:
+            reconciled_pending.append(pos)
+            print(f"  PENDING {ticker:<6} order status={status or 'unknown'}")
+
+    return reconciled_open, reconciled_pending
 
 
 def _sell_parking_for_cash(
@@ -165,6 +233,7 @@ def run_live(dry_run: bool = False) -> None:
     state     = _load_state()
     seen      = set(state.get("seen_signals", []))
     open_pos  = state.get("open_positions", [])
+    pending_entries = state.get("pending_entries", [])
 
     reliable_pols = load_reliable_politicians()
     using_fallback = not os.path.exists("congress_rankings.csv")
@@ -179,7 +248,7 @@ def run_live(dry_run: bool = False) -> None:
     _place_order  = None
 
     try:
-        from broker.alpaca_paper import get_account, get_positions, place_market_order
+        from broker.alpaca_paper import get_account, get_order, get_positions, place_market_order
         acct           = get_account()
         live_positions = get_positions()
         equity         = acct["equity"]
@@ -198,7 +267,13 @@ def run_live(dry_run: bool = False) -> None:
         else:
             print(f"  [error] Alpaca connection failed: {e}")
             print("  Add API keys to .env or use --dry-run to simulate.")
-            return
+        return
+
+
+    if not dry_run:
+        open_pos, pending_entries = _reconcile_entries(
+            open_pos, pending_entries, seen, live_tickers, get_order
+        )
 
     parking_qty = _position_qty(live_positions, PARKING_TICKER)
     parking_price = get_latest_price(PARKING_TICKER)
@@ -322,11 +397,11 @@ def run_live(dry_run: bool = False) -> None:
         raw_keys = all_signal_keys_for_ticker(raw_sigs, ticker) | \
                    all_signal_keys_for_ticker(opt_sigs, ticker)
 
-        if len(open_pos) >= MAX_POSITIONS:
+        if len(open_pos) + len(pending_entries) >= MAX_POSITIONS:
             print(f"          -> skip: at max positions ({MAX_POSITIONS})")
             continue   # intentionally don't mark seen — retry after an exit
 
-        if any(p["ticker"] == ticker for p in open_pos):
+        if any(p["ticker"] == ticker for p in open_pos + pending_entries):
             print(f"          -> skip: already holding {ticker}")
             seen.update(raw_keys)
             continue
@@ -384,7 +459,7 @@ def run_live(dry_run: bool = False) -> None:
         # NOTE: if _place_order is None (broker unreachable, non-dry-run), the block above is
         # skipped entirely and order_id stays "dry-run". The position is still appended below,
         # creating a phantom state entry. Guard: check Alpaca connectivity before running live.
-        open_pos.append({
+        new_position = {
             "ticker":       ticker,
             "politicians":  pols,
             "signal_date":  sig["report_date"],
@@ -396,8 +471,20 @@ def run_live(dry_run: bool = False) -> None:
             "entry_price":  price,
             "accumulation": sig.get("accumulation", False),
             "source":       sig.get("source", "stock"),
-        })
+            "signal_keys":  sorted(raw_keys),
+        }
+        if dry_run:
+            open_pos.append(new_position)
+        else:
+            pending_entries.append(new_position)
         seen.update(raw_keys)
+
+    # A market-hours order may fill between submission and this point. Reconcile once
+    # more so the saved state and terminal summary use the actual fill when available.
+    if not dry_run and pending_entries:
+        open_pos, pending_entries = _reconcile_entries(
+            open_pos, pending_entries, seen, live_tickers, get_order
+        )
 
     # --- Portfolio summary ---
     print(f"\n--- Open Positions ({len(open_pos)}) ---")
@@ -428,6 +515,11 @@ def run_live(dry_run: bool = False) -> None:
     else:
         print("  (none)")
 
+    if pending_entries:
+        print(f"\n--- Pending Entries ({len(pending_entries)}) ---")
+        for pos in pending_entries:
+            print(f"  {pos['ticker']:<6} order={pos.get('order_id', '?')}")
+
     cash = _sweep_cash_to_parking(
         cash=cash,
         equity=equity,
@@ -438,6 +530,7 @@ def run_live(dry_run: bool = False) -> None:
 
     # --- Persist ---
     state["open_positions"]  = open_pos
+    state["pending_entries"] = pending_entries
     state["closed_positions"] = state.get("closed_positions", []) + new_closed
     state["seen_signals"]    = list(seen)
     state["last_checked"]    = today
