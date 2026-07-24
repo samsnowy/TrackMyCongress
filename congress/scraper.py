@@ -21,6 +21,7 @@ import io
 import re
 import time
 import os
+from pathlib import Path
 
 _HEADERS   = {"User-Agent": "TrackMyCongress/1.0 (research; public STOCK Act data)"}
 _OUT_FILE      = "congress_historical.csv"
@@ -35,6 +36,9 @@ TRANSACTION_MAP = {
     "E": "Exchange",
     "O": "Other",
 }
+
+_TICKER_RE = r"[A-Z]{1,5}(?:[.-][A-Z])?"
+_OWNER_CODES = {"JT", "SP", "DC"}
 
 
 def _get_filing_index(year: int) -> list[dict]:
@@ -112,6 +116,65 @@ def _parse_option_details(text: str) -> dict:
     }
 
 
+def _parse_collapsed_transaction(text: str, filing_meta: dict) -> dict | None:
+    """Parse a transaction table row that pdfplumber collapsed into one cell."""
+    text = text.replace("\x00", "").replace("\n", " ").strip()
+    transaction = re.search(
+        r"\s(?P<tx>S \(partial\)|P|S|E)\s+"
+        r"(?P<tx_date>\d{2}/\d{2}/\d{4})\s+"
+        r"(?P<notif_date>\d{2}/\d{2}/\d{4})",
+        text,
+    )
+    ticker = re.search(
+        rf"\((?P<ticker>{_TICKER_RE})\)\s*\[(?P<asset_code>[A-Z]{{2}})\]",
+        text,
+    )
+    if not transaction or not ticker:
+        return None
+    amounts = list(re.finditer(r"\$[\d,]+", text[transaction.end():]))
+    if len(amounts) < 2:
+        return None
+
+    asset = text[:transaction.start()].strip()
+    amount_end = transaction.end() + amounts[1].end()
+    if ticker.start() > amount_end:
+        asset = f"{asset} {text[amount_end:ticker.start()]}".strip()
+    asset = re.sub(r"^\d+\s+", "", asset)
+    owner = ""
+    first, separator, remainder = asset.partition(" ")
+    if separator and first in _OWNER_CODES:
+        owner = first
+        asset = remainder
+    company = re.sub(
+        rf"\s*\({_TICKER_RE}\)\s*\[[A-Z]{{2}}\].*$", "", asset
+    ).strip()
+
+    details = _parse_option_details(text[max(amount_end, ticker.end()):])
+    return {
+        "name":              filing_meta["name"],
+        "state_dst":         filing_meta["state_dst"],
+        "doc_id":            filing_meta["doc_id"],
+        "filing_date":       filing_meta["filing_date"],
+        "owner":             owner,
+        "company":           company,
+        "ticker":            ticker.group("ticker"),
+        "transaction":       TRANSACTION_MAP.get(
+            transaction.group("tx"), transaction.group("tx")
+        ),
+        "transaction_date":  transaction.group("tx_date"),
+        "notification_date": transaction.group("notif_date"),
+        "amount_range":      (
+            f"{amounts[0].group()} - {amounts[1].group()}"
+        ),
+        "asset_code":        ticker.group("asset_code"),
+        "option_type":       details["option_type"],
+        "contracts":         details["contracts"],
+        "strike":            details["strike"],
+        "expiration":        details["expiration"],
+        "footnote":          text,
+    }
+
+
 def _parse_ptr_pdf(pdf_bytes: bytes, filing_meta: dict) -> tuple[list[dict], list[dict]]:
     """
     Extract stock and option transactions from a PTR PDF.
@@ -136,48 +199,14 @@ def _parse_ptr_pdf(pdf_bytes: bytes, filing_meta: dict) -> tuple[list[dict], lis
 
         pending_option: dict | None = None
 
-        def parse_collapsed_row(text: str) -> dict | None:
-            text = text.replace("\n", " ").strip()
-            m = re.search(
-                r"^(?P<owner>\S+)\s+"
-                r"(?P<company>.*?)\s+"
-                r"(?P<tx>P|S|S \(partial\)|E)\s+"
-                r"(?P<tx_date>\d{2}/\d{2}/\d{4})\s+"
-                r"(?P<notif_date>\d{2}/\d{2}/\d{4})\s+"
-                r"(?P<amount_start>\$[\d,]+)\s*-\s*"
-                r"\((?P<ticker>[A-Z]{1,5}(?:\.[A-Z])?)\)\s*\[(?P<asset_code>ST|OP)\]\s*"
-                r"(?P<amount_end>\$[\d,]+)"
-                r"(?P<footnote>.*)$",
-                text,
-            )
-            if not m:
-                return None
-
-            details = _parse_option_details(m.group("footnote"))
-            return {
-                "name":              filing_meta["name"],
-                "state_dst":         filing_meta["state_dst"],
-                "doc_id":            filing_meta["doc_id"],
-                "filing_date":       filing_meta["filing_date"],
-                "owner":             m.group("owner"),
-                "company":           m.group("company").strip(),
-                "ticker":            m.group("ticker"),
-                "transaction":       TRANSACTION_MAP.get(m.group("tx"), m.group("tx")),
-                "transaction_date":  m.group("tx_date"),
-                "notification_date": m.group("notif_date"),
-                "amount_range":      f"{m.group('amount_start')} - {m.group('amount_end')}",
-                "asset_code":        m.group("asset_code"),
-                "option_type":       details["option_type"],
-                "contracts":         details["contracts"],
-                "strike":            details["strike"],
-                "expiration":        details["expiration"],
-                "footnote":          text,
-            }
-
         for clean in all_rows:
             date_col = clean[4] if len(clean) > 4 else ""
             has_date = bool(re.match(r"\d{2}/\d{2}/\d{4}", date_col))
-            collapsed = parse_collapsed_row(clean[0]) if clean and clean[0] else None
+            collapsed = (
+                _parse_collapsed_transaction(clean[0], filing_meta)
+                if clean and clean[0]
+                else None
+            )
 
             # Accumulate footnote rows for a pending option
             if pending_option is not None:
@@ -199,7 +228,7 @@ def _parse_ptr_pdf(pdf_bytes: bytes, filing_meta: dict) -> tuple[list[dict], lis
 
             if collapsed is not None:
                 asset_code = collapsed.pop("asset_code")
-                if asset_code == "ST":
+                if asset_code != "OP":
                     collapsed.pop("option_type", None)
                     collapsed.pop("contracts", None)
                     collapsed.pop("strike", None)
@@ -223,7 +252,7 @@ def _parse_ptr_pdf(pdf_bytes: bytes, filing_meta: dict) -> tuple[list[dict], lis
                 continue
 
             ticker_match = re.search(
-                r"\(([A-Z]{1,5}(?:\.[A-Z])?)\)\s*\[(ST|OP)\]", asset
+                rf"\(({_TICKER_RE})\)\s*\[([A-Z]{{2}})\]", asset
             )
             if not ticker_match:
                 continue
@@ -245,7 +274,7 @@ def _parse_ptr_pdf(pdf_bytes: bytes, filing_meta: dict) -> tuple[list[dict], lis
                 "amount_range":      amount.replace("\n", " ").strip(),
             }
 
-            if asset_code == "ST":
+            if asset_code != "OP":
                 stocks.append(base)
             else:
                 # Check if details are already embedded in the asset cell (merged rows)
@@ -369,6 +398,130 @@ def scrape_all(
     return pd.read_csv(_OUT_FILE)
 
 
+def _dedupe_amended_filings(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prefer the highest document ID when multiple filings report the same trade.
+
+    Duplicate rows inside one document are preserved. This only removes matching
+    trades repeated across separate documents, which is how House amendments are
+    published.
+    """
+    if df.empty:
+        return df
+    keys = [
+        "name", "owner", "ticker", "transaction", "transaction_date",
+        "amount_range",
+    ]
+    if any(key not in df.columns for key in keys + ["doc_id"]):
+        return df
+
+    result = df.copy()
+    result["_doc_num"] = pd.to_numeric(result["doc_id"], errors="coerce").fillna(-1)
+    newest = result.groupby(keys, dropna=False)["_doc_num"].transform("max")
+    result = result[result["_doc_num"] == newest]
+    return result.drop(columns="_doc_num").reset_index(drop=True)
+
+
+def _replace_csv_window(
+    path: str,
+    recent: list[dict],
+    replaced_doc_ids: set[str],
+) -> None:
+    """Atomically replace rows belonging to a cleanly re-scraped filing window."""
+    frames = []
+    if os.path.exists(path):
+        existing = pd.read_csv(path, dtype={"doc_id": str})
+        existing = existing[
+            ~existing["doc_id"].astype(str).isin(replaced_doc_ids)
+        ]
+        frames.append(existing)
+    if recent:
+        frames.append(pd.DataFrame(recent))
+    if not frames:
+        return
+
+    merged = _dedupe_amended_filings(pd.concat(frames, ignore_index=True))
+    temp_path = Path(path).with_suffix(Path(path).suffix + ".tmp")
+    merged.to_csv(temp_path, index=False)
+    os.replace(temp_path, path)
+
+
+def scrape_recent_clean(months: int = 3) -> pd.DataFrame:
+    """
+    Re-download every House PTR in a recent filing-date window.
+
+    Existing rows for every filing in the window are removed and replaced
+    atomically, so parser improvements can be applied without duplicate appends.
+    """
+    if months < 1:
+        raise ValueError("months must be at least 1")
+
+    cutoff = pd.Timestamp.today().normalize() - pd.DateOffset(months=months)
+    years = range(cutoff.year, pd.Timestamp.today().year + 1)
+    filings = []
+    for year in years:
+        print(f"[{year}] Fetching filing index...")
+        filings.extend(_get_filing_index(year))
+
+    filings = [
+        filing for filing in filings
+        if pd.to_datetime(filing["filing_date"], errors="coerce") >= cutoff
+    ]
+    filings.sort(
+        key=lambda filing: (
+            pd.to_datetime(filing["filing_date"], errors="coerce"),
+            int(filing["doc_id"]),
+        )
+    )
+    print(
+        f"Clean re-scrape: {len(filings)} filings since "
+        f"{cutoff.date().isoformat()}"
+    )
+
+    stocks = []
+    options = []
+    completed_ids = set()
+    zero_row_ids = []
+    for index, filing in enumerate(filings, start=1):
+        doc_id = filing["doc_id"]
+        url = (
+            "https://disclosures-clerk.house.gov/public_disc/ptr-pdfs/"
+            f"{filing['year']}/{doc_id}.pdf"
+        )
+        try:
+            response = requests.get(url, headers=_HEADERS, timeout=15)
+            response.raise_for_status()
+            filing_stocks, filing_options = _parse_ptr_pdf(
+                response.content, filing
+            )
+            stocks.extend(filing_stocks)
+            options.extend(filing_options)
+            completed_ids.add(str(doc_id))
+            if not filing_stocks and not filing_options:
+                zero_row_ids.append(str(doc_id))
+        except Exception as exc:
+            print(f"  SKIP {doc_id}: {exc}")
+
+        if index % 50 == 0:
+            print(
+                f"  {index}/{len(filings)} filings | "
+                f"{len(stocks)} transactions, {len(options)} options"
+            )
+        time.sleep(_DELAY)
+
+    # Only replace filings successfully downloaded. A transient failure must not
+    # delete previously collected rows.
+    _replace_csv_window(_OUT_FILE, stocks, completed_ids)
+    _replace_csv_window(_OPTIONS_FILE, options, completed_ids)
+    print(
+        f"Clean re-scrape complete: {len(stocks)} transactions, "
+        f"{len(options)} options, {len(zero_row_ids)} zero-row filings"
+    )
+    if zero_row_ids:
+        print("Zero-row filing IDs: " + ",".join(zero_row_ids))
+    return pd.read_csv(_OUT_FILE)
+
+
 def _append_to_csv(trades: list[dict], path: str) -> None:
     if not trades:
         return
@@ -394,13 +547,27 @@ def load_historical() -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    import sys as _sys
-    opts_only = "--options-only" in _sys.argv
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--options-only", action="store_true")
+    parser.add_argument(
+        "--recent-months",
+        type=int,
+        help="cleanly re-scrape and replace this many recent filing months",
+    )
+    args = parser.parse_args()
+    opts_only = args.options_only
     print("House PTR Scraper — fetching all PTR filings 2022–2026")
-    if opts_only:
+    if args.recent_months:
+        print(f"Mode: clean recent rebuild ({args.recent_months} months)")
+    elif opts_only:
         print("Mode: options only (re-parses all PDFs, writes congress_options.csv)")
     print("This will take ~10–15 minutes. Safe to Ctrl+C and resume later.\n")
-    df = scrape_all(years=_YEARS, options_only=opts_only)
+    if args.recent_months:
+        df = scrape_recent_clean(months=args.recent_months)
+    else:
+        df = scrape_all(years=_YEARS, options_only=opts_only)
     print(f"\nStocks ({_OUT_FILE}):")
     print(f"  Total trades:    {len(df):,}")
     print(f"  Unique tickers:  {df['ticker'].nunique():,}")
