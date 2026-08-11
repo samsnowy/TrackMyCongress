@@ -1,6 +1,6 @@
 import unittest
 
-from congress.live import _reconcile_entries
+from congress.live import _reconcile_entries, _sync_positions_from_broker
 
 
 class ReconcileEntriesTests(unittest.TestCase):
@@ -99,6 +99,41 @@ class ReconcileEntriesTests(unittest.TestCase):
         )
 
         self.assertEqual(open_positions[0]["entry_date"], "2026-07-23")
+
+
+class BrokerPositionSyncTests(unittest.TestCase):
+    def test_split_adjusted_quantity_and_cost_basis_replace_stale_state(self):
+        state_position = {
+            "ticker": "MNST",
+            "qty": 489,
+            "entry_price": 96.529918,
+            "entry_date": "2026-05-20",
+            "planned_exit": "2026-08-18",
+            "politicians": ["Example Politician"],
+        }
+        broker_positions = [
+            {
+                "ticker": "MNST",
+                "qty": 978,
+                "avg_entry": 48.264959,
+                "current_price": 45.96,
+                "unrealized_pl": -2254.45,
+            }
+        ]
+
+        synced = _sync_positions_from_broker([state_position], broker_positions)
+
+        self.assertEqual(synced[0]["qty"], 978)
+        self.assertEqual(synced[0]["entry_price"], 48.264959)
+        self.assertEqual(synced[0]["planned_exit"], "2026-08-18")
+        self.assertEqual(synced[0]["politicians"], ["Example Politician"])
+
+    def test_missing_broker_position_does_not_destroy_local_state(self):
+        state_position = {"ticker": "MNST", "qty": 489, "entry_price": 96.529918}
+
+        synced = _sync_positions_from_broker([state_position], [])
+
+        self.assertEqual(synced[0], state_position)
 
 
 if __name__ == "__main__":

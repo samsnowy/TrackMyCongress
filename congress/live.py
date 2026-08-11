@@ -101,6 +101,45 @@ def _position_signal_keys(pos: dict) -> set[str]:
     return {f"{ticker}_{report_date}_{name}" for name in politicians if ticker and report_date}
 
 
+def _sync_positions_from_broker(
+    open_positions: list[dict],
+    live_positions: list[dict],
+) -> list[dict]:
+    """Refresh broker-owned fields after fills and corporate actions.
+
+    Alpaca adjusts position quantity and average entry price for stock splits.  Local
+    strategy state owns the signal metadata and planned exit, but must not keep stale
+    execution values or a post-split exit could sell the wrong number of shares.
+    """
+    broker_by_ticker = {
+        str(pos.get("ticker", "")).upper(): pos
+        for pos in live_positions
+        if pos.get("ticker")
+    }
+    for pos in open_positions:
+        ticker = str(pos.get("ticker", "")).upper()
+        broker_pos = broker_by_ticker.get(ticker)
+        if not broker_pos:
+            continue
+
+        old_qty = float(pos.get("qty") or 0)
+        old_entry = float(pos.get("entry_price") or 0)
+        new_qty = float(broker_pos.get("qty") or 0)
+        new_entry = float(broker_pos.get("avg_entry") or 0)
+
+        if new_qty > 0:
+            pos["qty"] = new_qty
+        if new_entry > 0:
+            pos["entry_price"] = new_entry
+
+        if (new_qty > 0 and new_qty != old_qty) or (new_entry > 0 and new_entry != old_entry):
+            print(
+                f"  SYNC  {ticker:<6} broker position changed: "
+                f"qty {old_qty:g}->{new_qty:g}, entry ${old_entry:.2f}->${new_entry:.2f}"
+            )
+    return open_positions
+
+
 def _reconcile_entries(
     open_positions: list[dict],
     pending_entries: list[dict],
@@ -274,6 +313,7 @@ def run_live(dry_run: bool = False) -> None:
         open_pos, pending_entries = _reconcile_entries(
             open_pos, pending_entries, seen, live_tickers, get_order
         )
+        open_pos = _sync_positions_from_broker(open_pos, live_positions)
 
     parking_qty = _position_qty(live_positions, PARKING_TICKER)
     parking_price = get_latest_price(PARKING_TICKER)
