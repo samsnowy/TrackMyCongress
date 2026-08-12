@@ -15,6 +15,7 @@ RISK_PER_TRADE = 0.01
 HOLD_DAYS          = 90     # stock signal hold period (days)
 OPTIONS_HOLD_DAYS  = 30     # options signal hold period -- signal fades faster
 MAX_POSITIONS      = 15
+MAX_SIGNALS_PER_FILING_BATCH = 1  # prevent one politician's bulk filing dominating entries
 POSITION_SIZE_PCT  = 0.05   # 5% of equity per position
 PARKING_TICKER     = "SPY"  # idle cash parking vehicle for the paper strategy
 CASH_BUFFER_PCT    = 0.01   # keep 1% of equity as cash for small price/order drift

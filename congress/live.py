@@ -36,6 +36,7 @@ from congress.strategy import (
     detect_options_signals,
     load_reliable_politicians,
     positions_to_exit,
+    rank_signals,
 )
 from data.fetcher import get_latest_price, get_latest_prices
 
@@ -420,7 +421,32 @@ def run_live(dry_run: bool = False) -> None:
                   f"  by {s['politician']}{strike_str}  hold {s['hold_days']}d")
 
     # Merge both signal lists; options signals already have hold_days set
-    all_signals = signals + opt_sigs
+    all_signals = rank_signals(signals + opt_sigs, reliable_pols)
+
+    if all_signals:
+        available_slots = max(0, MAX_POSITIONS - len(open_pos) - len(pending_entries))
+        print(f"\n--- Ranked Signal Queue ({available_slots} slot(s) available) ---")
+        held_tickers = {p.get("ticker") for p in open_pos + pending_entries}
+        eligible_used = 0
+        for index, sig in enumerate(all_signals, 1):
+            rank = sig["rank"]
+            if not rank["batch_selected"]:
+                status = "batch-skip"
+            elif sig["ticker"] in held_tickers:
+                status = "held"
+            elif eligible_used < available_slots:
+                status = "eligible"
+                eligible_used += 1
+            else:
+                status = "backlog"
+            kind = "options" if rank["options"] else "stock"
+            print(
+                f"  {index:>2}. {sig['ticker']:<6} {status:<8} {kind:<7} "
+                f"politicians={rank['politician_count']} "
+                f"alpha={rank['max_avg_excess']:+.1f}% "
+                f"range_floor=${rank['amount_floor']:,} "
+                f"traded={rank['tx_date']} filed={rank['report_date']}"
+            )
 
     # --- Execute entries ---
     for sig in all_signals:
@@ -436,6 +462,11 @@ def run_live(dry_run: bool = False) -> None:
         # raw_keys covers both stock and options signal keys for this ticker
         raw_keys = all_signal_keys_for_ticker(raw_sigs, ticker) | \
                    all_signal_keys_for_ticker(opt_sigs, ticker)
+
+        if not sig["rank"]["batch_selected"]:
+            print("          -> skip: filing batch diversification cap")
+            seen.update(raw_keys)
+            continue
 
         if len(open_pos) + len(pending_entries) >= MAX_POSITIONS:
             print(f"          -> skip: at max positions ({MAX_POSITIONS})")

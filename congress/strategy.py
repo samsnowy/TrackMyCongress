@@ -16,6 +16,7 @@ pure computation on DataFrames and dicts.
 
 import os
 import re
+import hashlib
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 
@@ -23,6 +24,7 @@ import pandas as pd
 
 from config import (
     HOLD_DAYS, OPTIONS_HOLD_DAYS, MAX_POSITIONS, POSITION_SIZE_PCT,
+    MAX_SIGNALS_PER_FILING_BATCH,
     SIGNAL_LOOKBACK, OPTIONS_LOOKBACK, DEEP_ITM_THRESHOLD,
     RELIABLE_MIN_EXCESS, RELIABLE_MIN_TRADES, MAX_SIGNAL_AGE,
 )
@@ -170,12 +172,9 @@ def deduplicate_signals(signals: list[dict]) -> list[dict]:
     for _, group in by_ticker.items():
         group.sort(key=lambda x: x["report_date"])
         lead = dict(group[-1])  # latest filing drives the signal
-        if len(group) > 1:
-            lead["politicians"]   = [s["politician"] for s in group]
-            lead["accumulation"]  = True
-        else:
-            lead["politicians"]   = [lead["politician"]]
-            lead["accumulation"]  = False
+        politicians = list(dict.fromkeys(s["politician"] for s in group))
+        lead["politicians"] = politicians
+        lead["accumulation"] = len(politicians) > 1
         deduped.append(lead)
 
     return deduped
@@ -184,6 +183,90 @@ def deduplicate_signals(signals: list[dict]) -> list[dict]:
 def all_signal_keys_for_ticker(signals: list[dict], ticker: str) -> set:
     """Return every signal_key for a given ticker from a raw signals list."""
     return {s["signal_key"] for s in signals if s["ticker"] == ticker}
+
+
+def _amount_floor(range_str: str) -> int:
+    """Return the disclosed range's lower bound for deterministic ranking."""
+    match = re.search(r"\$?([\d,]+)", str(range_str))
+    return int(match.group(1).replace(",", "")) if match else 0
+
+
+def rank_signals(signals: list[dict], reliable_pols: dict[str, dict]) -> list[dict]:
+    """Rank capacity-constrained signals using transparent evidence tiers.
+
+    Priority is lexicographic rather than a fitted score: independent accumulation,
+    curated deep-ITM option signals, politician backtest strength, disclosed size,
+    filing and transaction recency. Signals from one politician/report batch are
+    capped so a bulk filing cannot consume the portfolio. Fully tied candidates use
+    a stable hash draw rather than ticker alphabetization. Each returned signal
+    includes the components so live output can explain why it was ordered there.
+    """
+    ranked = []
+    for signal in signals:
+        item = dict(signal)
+        politicians = item.get("politicians") or [item.get("politician", "")]
+        unique_politicians = {str(name) for name in politicians if name}
+        excess_values = []
+        for name in unique_politicians:
+            words = set(_normalize_name(name).split())
+            for reliable_name, profile in reliable_pols.items():
+                reliable_words = set(_normalize_name(reliable_name).split())
+                if reliable_words <= words or words <= reliable_words:
+                    excess_values.append(float(profile.get("avg_excess", 0)))
+                    break
+        report_date = str(item.get("report_date", ""))
+        try:
+            report_ordinal = datetime.strptime(report_date, "%Y-%m-%d").date().toordinal()
+        except ValueError:
+            report_ordinal = 0
+        tx_date = str(item.get("tx_date", ""))
+        try:
+            tx_ordinal = datetime.strptime(tx_date, "%Y-%m-%d").date().toordinal()
+        except ValueError:
+            tx_ordinal = 0
+        batch_key = "|".join(
+            [str(item.get("source", "stock")), report_date, *sorted(unique_politicians)]
+        )
+        neutral_draw = int.from_bytes(
+            hashlib.sha256(f"{batch_key}|{item.get('ticker', '')}".encode()).digest()[:8],
+            "big",
+        )
+        components = {
+            "politician_count": len(unique_politicians),
+            "options": item.get("source") == "options",
+            "max_avg_excess": max(excess_values, default=0.0),
+            "amount_floor": _amount_floor(item.get("range", "")),
+            "report_date": report_date,
+            "report_ordinal": report_ordinal,
+            "tx_date": tx_date,
+            "tx_ordinal": tx_ordinal,
+            "batch_key": batch_key,
+            "neutral_draw": neutral_draw,
+        }
+        item["rank"] = components
+        ranked.append(item)
+
+    ranked = sorted(
+        ranked,
+        key=lambda item: (
+            -item["rank"]["politician_count"],
+            -int(item["rank"]["options"]),
+            -item["rank"]["max_avg_excess"],
+            -item["rank"]["amount_floor"],
+            -item["rank"]["report_ordinal"],
+            -item["rank"]["tx_ordinal"],
+            -item["rank"]["neutral_draw"],
+        ),
+    )
+
+    batch_counts: dict[str, int] = defaultdict(int)
+    for item in ranked:
+        batch_key = item["rank"]["batch_key"]
+        selected = batch_counts[batch_key] < MAX_SIGNALS_PER_FILING_BATCH
+        item["rank"]["batch_selected"] = selected
+        if selected:
+            batch_counts[batch_key] += 1
+    return ranked
 
 
 def positions_to_exit(open_positions: list[dict], today: str | None = None) -> list[dict]:
